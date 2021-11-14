@@ -1,0 +1,13 @@
+s:Order rdf:type G:Concept
+s:Order G:hasFeature s:DATE
+s:Order G:hasFeature s:O_ID
+s:Order s:doneBy s:Customer
+s:DATE rdf:type G:Feature
+s:O_ID rdf:type G:Feature
+s:O_ID rdfs:subClassOf sc:identifier
+s:Customer rdf:type G:Concept
+s:Customer G:hasFeature s:C_ID
+s:Customer G:hasFeature s:NAME
+s:C_ID rdf:type G:Feature
+s:C_ID rdfs:subClassOf sc:identifier
+s:NAME rdf:type G:Feature

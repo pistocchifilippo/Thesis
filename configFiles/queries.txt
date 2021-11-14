@@ -1,0 +1,8 @@
+#q1
+SELECT ?a ?b ?c ?d
+WHERE {
+	VALUES ( ?a ?b ?c ?d ) { ( s: s: s: s: ) }
+	s:Person G:hasFeature s:PersonID .
+	
+}
+#

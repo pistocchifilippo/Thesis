@@ -1,0 +1,17 @@
+s:WrapperW1 rdf:type S:Wrapper
+s:WrapperW1 S:hasAttribute s:date
+s:WrapperW1 S:hasAttribute s:oId
+s:WrapperW1 S:hasAttribute s:cId
+s:date rdf:type S:Attribute
+s:date owl:sameAs s:DATE
+s:oId rdf:type S:Attribute
+s:oId owl:sameAs s:O_ID
+s:cId rdf:type S:Attribute
+s:cId owl:sameAs s:C_ID
+s:WrapperW2 rdf:type S:Wrapper
+s:WrapperW2 S:hasAttribute s:cId2
+s:WrapperW2 S:hasAttribute s:name
+s:cId2 rdf:type S:Attribute
+s:cId2 owl:sameAs s:C_ID
+s:name rdf:type S:Attribute
+s:name owl:sameAs s:NAME

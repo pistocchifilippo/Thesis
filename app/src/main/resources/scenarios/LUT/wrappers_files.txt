@@ -1,0 +1,5 @@
+https://serginf.github.io/WrapperW3,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/WrapperW3.csv
+https://serginf.github.io/WrapperLUT,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/WrapperLUT.csv
+https://serginf.github.io/WrapperW2,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/WrapperW2.csv
+https://serginf.github.io/WrapperW1,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/WrapperW1.csv
+https://serginf.github.io/WrapperLUT2,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/WrapperLUT2.csv

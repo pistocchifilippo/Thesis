@@ -1,0 +1,2 @@
+https://serginf.github.io/WrapperW1,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/OrderCustomer/WrapperW1.csv
+https://serginf.github.io/WrapperW2,/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/OrderCustomer/WrapperW2.csv
