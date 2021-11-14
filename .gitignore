@@ -26,6 +26,8 @@ project/plugins/project/
 
 resources/scenarios/*
 
+TestScenarioRunnerDataset/
+
 nexitaqr.db
 
 .DS_Store
