@@ -26,6 +26,8 @@ project/plugins/project/
 
 resources/scenarios/*
 
+nexitaqr.db
+
 .DS_Store
 
 

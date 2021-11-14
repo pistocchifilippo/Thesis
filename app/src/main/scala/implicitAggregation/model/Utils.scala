@@ -42,8 +42,8 @@ object Utils {
     mappingWriter.close()
     queryWriter.close()
 
-    copyF(new File("configFiles/metamodel.txt"), scenario + "metamodel.txt")
-    copyF(new File("configFiles/prefixes.txt"), scenario + "prefixes.txt")
+    copyF(new File("app/src/main/resources/configFiles/metamodel.txt"), scenario + "metamodel.txt")
+    copyF(new File("app/src/main/resources/configFiles/prefixes.txt"), scenario + "prefixes.txt")
   }
 
   def copyF(from: java.io.File, to: String) {
