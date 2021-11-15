@@ -14,7 +14,7 @@ object LUT extends App {
   val CITY = IdFeature("CITY")
   val REGION = IdFeature("REGION")
   val COUNTRY = IdFeature("COUNTRY")
-  val REVENUE = GenericFeature("REVENUE")
+  val REVENUE = Measure("REVENUE")
 
   // Graph hierarchy
   val Sales =

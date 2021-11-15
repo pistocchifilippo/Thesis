@@ -24,7 +24,8 @@ project/plugins/project/
 .idea
 .bsp
 
-resources/scenarios/*
+app/src/main/resources/scenarios/*
+data/sqlite/nextiaqr.db
 
 TestScenarioRunnerDataset/
 
