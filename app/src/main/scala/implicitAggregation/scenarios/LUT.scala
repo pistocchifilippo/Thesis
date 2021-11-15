@@ -63,5 +63,6 @@ object LUT extends App {
 
   // WRITERS
   Utils.generateAllFiles(Set(Sales),Set(w1,w2,w3,w4,w5),q)(configurationFilePath)
+  QueryExecution.execute(scenario,basePath)(q)(Sales)(Set(avg))(Set(w1,w2,w3,w4,w5))
 
 }
