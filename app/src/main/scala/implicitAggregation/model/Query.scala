@@ -19,7 +19,7 @@ object Query {
     val s = new Scanner(source)
     while (s.hasNext()){
       val l= s.nextLine()
-      if(!l.contains("G:Concept") && !l.contains("G:Feature") && !l.contains("sc:identifier")) {
+      if(!l.contains("G:Concept") && !l.contains("G:Feature") && !l.contains("sc:identifier") && !l.contains("G:Measure")) {
         out = out + l + "\n"
       }
     }
