@@ -22,14 +22,40 @@ object ImplicitAggregation {
   def parseAggregationClauses(functionAndMeasure:Set[(AggregatingFunction,Set[Measure])]): String =
     functionAndMeasure.flatMap(e => e._2.map(c => s"${e._1.name}(${c.name}) as ${c.name}")).mkString(",")
 
-  def makeView(): String = "SELECT a,b,c\nFROM A"
+  def aggregationLevels(q: Concept)(trace: Set[Level]): Set[Level] = q match {
+    case l:Level => {
+      if (!l.linkedFeatures.exists(f => f._2 match {
+        case IdFeature(_) => true
+        case _ => false
+      })) Set.empty ++ q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(trace + l)) else Set(l) ++ q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(Set.empty)) ++ trace
+    } ++ q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(trace + l))
+    case _ => q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(Set.empty))
+  }
 
-  def makeSqlQuery(functions:Set[AggregatingFunction],q:Concept): String =
+//  def expandLevelIdentifiers(aggregationLevels: Set[Level])(q: Concept)(g: Concept): Concept = {
+//    q match {
+//      case l:Level => Level(l.name)
+//      case c:GenericConcept =>
+//    }
+//  }
+
+  def findFeature(levels: Set[Level])(g: Concept): Set[Feature] = {
+    if (g match {
+      case l: Level =>
+        val ex = l.linkedFeatures.map(_._2).collect({ case f: IdFeature => f }).nonEmpty && levels.map(_.name).contains(g.name)
+        println(ex,g.name)
+        ex
+      case _ => false
+    }) g.linkedFeatures.map(_._2).collect({ case f: IdFeature => f }) ++ g.linkedConcepts.flatMap(x => findFeature(levels)(x._2)) else {
+      g.linkedConcepts.flatMap(x => findFeature(levels)(x._2))
+    }
+  }
+
+  def makeSqlQuery(functions:Set[AggregatingFunction],q:Concept,makeView:() => String): String =
     if(canAggregate(q)){
       val gbClauses = parseGBClauses(extractGroupByClauses(q))
       val aggClauses = parseAggregationClauses(extractAggregationClauses(functions,q))
-      val view = makeView()
-      s"SELECT $gbClauses,$aggClauses\nFROM{\n$view\n}\nGROUP BY $gbClauses"
+      s"SELECT $gbClauses,$aggClauses\nFROM( ${makeView()} )\nGROUP BY $gbClauses"
     } else {
       makeView()
     }
@@ -64,10 +90,10 @@ object TestAgg extends App{
   val REVENUE = Measure("REVENUE")
 
   // Graph hierarchy
-  val q =
+  val g =
     Concept("Sales")
       .hasFeature{REVENUE}
-      .->("location"){
+      .partOf{
         Level("City")
           .hasFeature{CITY}
           .partOf{
@@ -80,13 +106,30 @@ object TestAgg extends App{
           }
       }
 
+  val q2 =
+    Concept("Sales")
+      .hasFeature{REVENUE}
+      .partOf{
+        Level("City")
+          .partOf{
+            Level("Region")
+              .hasFeature{REGION}
+              .partOf{
+                Level("Country")
+              }
+          }
+      }
+
   val avg = AggregatingFunction("avg") aggregates REVENUE
   val sum = AggregatingFunction("sum") aggregates REVENUE
 
 //  println(
 //    extractAggregationClauses(Set(avg,sum),q).map(e => (e._1.name,e._2))
 //  )
-  println(makeSqlQuery(Set(avg,sum),q))
+
+  val v = aggregationLevels(q2)(Set.empty)
+  println(v.map(_.name))
+  println(findFeature(v)(g))
 
 
 }

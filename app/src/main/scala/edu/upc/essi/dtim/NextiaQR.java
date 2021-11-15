@@ -10,6 +10,7 @@ import edu.upc.essi.dtim.nextiaqr.utils.SQLiteUtils;
 import org.apache.jena.query.Dataset;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ public class NextiaQR {
         return QueryRewriting.rewriteToUnionOfConjunctiveQueries(SPARQL,T);
     }
 
-    public static String toSQL (Set<ConjunctiveQuery> UCQ) {
+    public static String toSQL (Set<ConjunctiveQuery> UCQ, Map<String,String> namesLut) {
         StringBuilder SQL = new StringBuilder();
         UCQ.forEach(q -> {
             StringBuilder select = new StringBuilder("SELECT ");
@@ -38,7 +39,13 @@ public class NextiaQR {
             //Now do the sorting
             List<String> projections = Lists.newArrayList(withoutDuplicates);//Lists.newArrayList(q.getProjections());
             //projections.sort(Comparator.comparingInt(s -> listOfFeatures.indexOf(QueryRewriting.featuresPerAttribute.get(s))));
-            projections.forEach(proj -> select.append("\""+GraphOperations.nn(proj).split("/")[GraphOperations.nn(proj).split("/").length-1]+"\""+","));
+//            projections.forEach(proj -> System.out.println(namesLut.get(GraphOperations.nn(proj))));
+            if (namesLut != null) {
+                projections.forEach(proj -> select.append(""+GraphOperations.nn(proj).split("/")[GraphOperations.nn(proj).split("/").length-1]+""+" as " + namesLut.get(GraphOperations.nn(proj)) + ","));
+            } else {
+                projections.forEach(proj -> select.append("\""+GraphOperations.nn(proj).split("/")[GraphOperations.nn(proj).split("/").length-1]+"\""+","));
+
+            }
             //q.getWrappers().forEach(w -> from.append(wrapperIriToID.get(w.getWrapper())+","));
             q.getWrappers().forEach(w -> from.append(GraphOperations.nn(w.getWrapper())+","));
             q.getJoinConditions().forEach(j -> where.append(
@@ -53,7 +60,7 @@ public class NextiaQR {
             }
             SQL.append(" UNION ");
         });
-        String SQLstr = SQL.substring(0,SQL.length()-" UNION ".length())+";";
+        String SQLstr = SQL.substring(0,SQL.length()-" UNION ".length())+"";
         return SQLstr;
     }
 

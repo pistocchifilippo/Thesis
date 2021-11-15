@@ -75,7 +75,7 @@ public class TestScenario_Runner {
                 });
                 cq.setWrappers(CSV_Wrappers);
             });
-            String SQL = NextiaQR.toSQL(CQs);
+            String SQL = NextiaQR.toSQL(CQs,null);
 
             //3 -- Convert SQL to DATA
             NextiaQR.executeSQL(CQs,SQL);

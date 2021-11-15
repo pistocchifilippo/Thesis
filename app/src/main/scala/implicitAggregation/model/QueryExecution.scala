@@ -15,8 +15,8 @@ import java.util
 object QueryExecution {
 
   def execute(scenario:String,basePath:String)(q: Concept)(g: Concept)(functions:Set[AggregatingFunction])(wrappers: Set[implicitAggregation.model.Wrapper]): Unit = {
-    val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario;
-    val scenarioPath = basePath +scenario+"/";
+    val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario
+    val scenarioPath = basePath +scenario + "/"
     val jenaPath = "TestScenarioRunnerDataset"
     FileUtils.deleteDirectory(new File(jenaPath))
 
@@ -58,7 +58,7 @@ object QueryExecution {
         })
         cq.setWrappers(CSV_Wrappers)
       })
-      var SQL = ImplicitAggregation.makeSqlQuery(functions,q,() => NextiaQR.toSQL(CQs))
+      val SQL = ImplicitAggregation.makeSqlQuery(functions, q, () => NextiaQR.toSQL(CQs, makeNameMappings(wrappers)))
 
       //3 -- Convert SQL to DATA
       NextiaQR.executeSQL(CQs, SQL)

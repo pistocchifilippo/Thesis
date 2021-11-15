@@ -4,17 +4,19 @@ import implicitAggregation.model._
 
 object LUT extends App {
 
-  val configurationFilePath = "/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/LUT/"
+  val basePath = "/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/"
+  val scenario = "LUT"
+  val configurationFilePath = basePath + scenario + "/"
 //  val configurationFilePath = "/Users/filippo/GraphBuilder/scenarios/LUT/"
   Utils.buildPath(configurationFilePath)
 
   // GRAPH DEFINITION
 
   // Features
-  val CITY = IdFeature("CITY")
-  val REGION = IdFeature("REGION")
-  val COUNTRY = IdFeature("COUNTRY")
-  val REVENUE = Measure("REVENUE")
+  val CITY = IdFeature("City")
+  val REGION = IdFeature("Region")
+  val COUNTRY = IdFeature("Country")
+  val REVENUE = Measure("Revenue")
 
   // Graph hierarchy
   val Sales =
@@ -33,6 +35,7 @@ object LUT extends App {
           }
       }
   val q = Sales
+  val avg = AggregatingFunction("avg") aggregates REVENUE
 
   // Wrappers
   val w1 =
