@@ -2,12 +2,12 @@ package implicitAggregation.scenarios
 
 import implicitAggregation.model._
 
-object LUT extends App {
+object LUTEasier extends App {
 
   val basePath = "/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/"
-  val scenario = "LUT"
+  val scenario = "LUTEasier"
   val configurationFilePath = basePath + scenario + "/"
-//  val configurationFilePath = "/Users/filippo/GraphBuilder/scenarios/LUT/"
+  //  val configurationFilePath = "/Users/filippo/GraphBuilder/scenarios/LUT/"
   Utils.buildPath(configurationFilePath)
 
   // GRAPH DEFINITION
@@ -15,7 +15,6 @@ object LUT extends App {
   // Features
   val CITY = IdFeature("City")
   val REGION = IdFeature("Region")
-  val COUNTRY = IdFeature("Country")
   val REVENUE = Measure("Revenue")
 
   // Graph hierarchy
@@ -28,21 +27,23 @@ object LUT extends App {
           .partOf{
             Level("Region")
               .hasFeature{REGION}
-              .partOf{
-                Level("Country")
-                  .hasFeature{COUNTRY}
               }
           }
+
+  val q =
+    Concept("Sales")
+      .hasFeature{REVENUE}
+      .->("location"){
+        Level("City")
+          .hasFeature{CITY}
+          .partOf{
+            Level("Region")
+              .hasFeature{REGION}
+          }
       }
-  val q = Sales
   val avg = AggregatingFunction("avg") aggregates REVENUE
 
   // Wrappers
-  val w1 =
-    Wrapper("W1")
-      .hasAttribute{Attribute("country") sameAs COUNTRY}
-      .hasAttribute{Attribute("revenue") sameAs REVENUE}
-
   val w2 =
     Wrapper("W2")
       .hasAttribute{Attribute("region") sameAs REGION}
@@ -53,11 +54,6 @@ object LUT extends App {
       .hasAttribute{Attribute("city") sameAs CITY}
       .hasAttribute{Attribute("revenue3") sameAs REVENUE}
 
-  val w4 =
-    Wrapper("LUT")
-      .hasAttribute{Attribute("region1") sameAs REGION}
-      .hasAttribute{Attribute("country1") sameAs COUNTRY}
-
   val w5 =
     Wrapper("LUT2")
       .hasAttribute{Attribute("city1") sameAs CITY}
@@ -65,7 +61,7 @@ object LUT extends App {
 
 
   // WRITERS
-  Utils.generateAllFiles(Set(Sales),Set(w1,w2,w3,w4,w5),q)(configurationFilePath)
-  QueryExecution.execute(scenario,basePath,makeImplicitAggregation = true)(q)(Set(avg))(Set(w1,w2,w3,w4,w5))
+  Utils.generateAllFiles(Set(Sales),Set(w2,w3,w5),q)(configurationFilePath)
+  QueryExecution.execute(scenario,basePath,makeImplicitAggregation = false)(q)(Set(avg))(Set(w2,w3,w5))
 
 }
