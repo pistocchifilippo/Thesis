@@ -4,11 +4,7 @@ import implicitAggregation.model._
 
 object LUT extends App {
 
-  val basePath = "/Users/filippo/ImplicitAggregation/app/src/main/resources/scenarios/"
   val scenario = "LUT"
-  val configurationFilePath = basePath + scenario + "/"
-//  val configurationFilePath = "/Users/filippo/GraphBuilder/scenarios/LUT/"
-  Utils.buildPath(configurationFilePath)
 
   // GRAPH DEFINITION
 
@@ -65,7 +61,8 @@ object LUT extends App {
 
 
   // WRITERS
-  Utils.generateAllFiles(Set(Sales),Set(w1,w2,w3,w4,w5),q)(configurationFilePath)
-  QueryExecution.execute(scenario,basePath,makeImplicitAggregation = true)(q)(Set(avg))(Set(w1,w2,w3,w4,w5))
+  Utils.buildPath(scenario)
+  Utils.generateAllFiles(Set(Sales),Set(w1,w2,w3,w4,w5),q)(scenario)
+  QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = true)(q)(Set(avg))(Set(w1,w2,w3,w4,w5))
 
 }
