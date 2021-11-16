@@ -16,7 +16,7 @@ object QueryExecution {
 
   def execute(scenario:String,basePath:String,makeImplicitAggregation: Boolean)(q: Concept)(functions:Set[AggregatingFunction])(wrappers: Set[implicitAggregation.model.Wrapper]): Unit = {
     val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario
-    val scenarioPath = basePath +scenario + "/"
+    val scenarioPath = basePath + scenario + "/"
     val jenaPath = "TestScenarioRunnerDataset"
     FileUtils.deleteDirectory(new File(jenaPath))
 

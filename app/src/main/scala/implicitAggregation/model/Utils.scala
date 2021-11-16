@@ -6,12 +6,15 @@ import java.io.{BufferedWriter, File, FileWriter}
 
 object Utils {
 
-  val ABSOLUTE_PROJECT_PATH: String = System.getProperty("user.dir")
+  private val ABSOLUTE_PROJECT_PATH: String = System.getProperty("user.dir")
   val SCENARIOS_PATH: String = ABSOLUTE_PROJECT_PATH + "/app/src/main/resources/scenarios/"
   private val DATA_PATH: String = ABSOLUTE_PROJECT_PATH + "/data"
   private val SQLITE_PATH: String = DATA_PATH + "/sqlite"
-  private val CONFIGURATION_FILES: Set[String] = Set(
-    "global_graph.txt","source_graph.txt","wrappers_files.txt","mappings.txt","queries.txt"
+  val CUSTOM_CONFIGURATION_FILES: Set[String] = Set(
+    "global_graph.txt","mappings.txt","queries.txt","source_graph.txt","wrappers_files.txt"
+  )
+  val FIXED_CONFIGURATION_FILES: Set[String] = Set(
+    "metamodel.txt","prefixes.txt"
   )
   val buildScenarioPath: String => String = scenario => SCENARIOS_PATH + scenario + "/"
 
@@ -20,10 +23,11 @@ object Utils {
     new File(buildScenarioPath(scenario)).mkdir()
     new File(DATA_PATH).mkdir()
     new File(SQLITE_PATH).mkdir()
-    CONFIGURATION_FILES.foreach(fileName => new File(buildScenarioPath(scenario) + fileName).createNewFile())
+    CUSTOM_CONFIGURATION_FILES.foreach(fileName => new File(buildScenarioPath(scenario) + fileName).createNewFile())
   }
 
   def generateAllFiles(concepts: Set[Concept], wrappers: Set[Wrapper], query: Concept)(scenario: String): Unit = {
+    buildPath(scenario)
     val scenario_path = buildScenarioPath(scenario)
     println("Generating files in directory: " + scenario_path)
     // Writers
@@ -60,7 +64,7 @@ object Utils {
     copyF(new File("app/src/main/resources/configFiles/prefixes.txt"), scenario_path + "prefixes.txt")
   }
 
-  def copyF(from: java.io.File, to: String) {
+  def copyF(from: java.io.File, to: String): Unit =  {
     IO.copy(from,new File(to))
   }
 

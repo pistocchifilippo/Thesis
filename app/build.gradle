@@ -10,9 +10,14 @@ plugins {
     // Apply the scala Plugin to add support for Scala.
     id 'scala'
 
+    id 'java'
+
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
 }
+
+
+mainClassName = 'Application'
 
 group 'edu.upc.essi.dtim'
 version '1.0-SNAPSHOT'
@@ -69,9 +74,19 @@ dependencies {
 
     // Need scala-xml at test runtime
     testRuntimeOnly 'org.scala-lang.modules:scala-xml_2.13:1.2.0'
+
 }
 
-application {
-    // Define the main class for the application.
-    mainClass = 'ImplicitAggregation.App'
+test {
+    useJUnitPlatform()
+
+    testLogging.showStandardStreams = true
+    ignoreFailures = false
+
+
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    jvmArgs '--enable-preview'
 }

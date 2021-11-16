@@ -25,9 +25,6 @@ object Query {
     }
     out
   }
-
-  def patternMatching(graph: Concept): String =
-    s"${graph.stringify().map(l => l + ". \n")}"
 }
 
 object TestQ extends App {
