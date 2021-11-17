@@ -1,0 +1,14 @@
+#q1
+SELECT ?Revenue ?City ?Region ?Country 
+WHERE {
+  VALUES ( ?Revenue ?City ?Region ?Country ) { ( s:Revenue s:City s:Region s:Country ) }
+  s:Sales G:hasFeature s:Revenue .
+  s:Sales s:location s:City .
+  s:City G:hasFeature s:City .
+  s:City s:partOf s:Region .
+  s:Region G:hasFeature s:Region .
+  s:Region s:partOf s:Country .
+  s:Country G:hasFeature s:Country .
+  
+}
+#

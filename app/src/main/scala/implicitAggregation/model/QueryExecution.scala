@@ -58,9 +58,9 @@ object QueryExecution {
         })
         cq.setWrappers(CSV_Wrappers)
       })
-      val SQL = if(makeImplicitAggregation)
+      val SQL = if(makeImplicitAggregation) {
         ImplicitAggregation.makeSqlQuery(functions, q, () => NextiaQR.toSQL(CQs, makeNameMappings(wrappers)))
-      else
+      } else
         NextiaQR.toSQL(CQs,null)
 
       //3 -- Convert SQL to DATA
