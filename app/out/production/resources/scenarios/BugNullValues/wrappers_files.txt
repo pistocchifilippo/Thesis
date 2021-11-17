@@ -1,1 +1,0 @@
-https://serginf.github.io/WrapperW1,/Users/filippo/Thesis/app/src/main/resources/scenarios/BugNullValues/WrapperW1.csv
