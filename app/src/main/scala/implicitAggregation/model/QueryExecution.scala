@@ -35,7 +35,7 @@ object QueryExecution {
 
       //1 -- Rewrite SPARQL to UCQs
       val CQs = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T)
-      println(CQs)
+      println("CQs" + CQs)
 
       //2 -- Convert UCQs to SQL
       /**
