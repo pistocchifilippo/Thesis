@@ -2,12 +2,9 @@ s:WrapperW1 rdf:type S:Wrapper
 s:WrapperW1 S:hasAttribute s:pId
 s:WrapperW1 S:hasAttribute s:Name
 s:WrapperW1 S:hasAttribute s:Surname
-s:WrapperW1 S:hasAttribute s:Income
 s:pId rdf:type S:Attribute
 s:pId owl:sameAs s:pId
 s:Name rdf:type S:Attribute
 s:Name owl:sameAs s:Name
 s:Surname rdf:type S:Attribute
 s:Surname owl:sameAs s:Surname
-s:Income rdf:type S:Attribute
-s:Income owl:sameAs s:Income

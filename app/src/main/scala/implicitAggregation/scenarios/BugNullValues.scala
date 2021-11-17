@@ -13,6 +13,7 @@ object BugNullValues extends App {
   val NAME = GenericFeature("Name")
   val SURNAME = GenericFeature("Surname")
   val INCOME = GenericFeature("Income")
+  val LIVING_ADDRESS = GenericFeature("LivingAddress")
 
   // Graph hierarchy
   val graph =
@@ -21,8 +22,16 @@ object BugNullValues extends App {
       .hasFeature{NAME}
       .hasFeature{SURNAME}
       .hasFeature{INCOME}
+      .hasFeature{LIVING_ADDRESS}
 
-  val query = graph
+  // The query
+  val query =
+    Concept("Person")
+      .hasFeature{PID}
+      .hasFeature{NAME}
+      .hasFeature{SURNAME}
+      .hasFeature{INCOME}
+
 
   // Wrappers
   val w1 =
@@ -31,7 +40,7 @@ object BugNullValues extends App {
       .hasAttribute{Attribute("Name") sameAs NAME}
       .hasAttribute{Attribute("Surname") sameAs SURNAME}
 //      .hasAttribute{Attribute("Income") sameAs INCOME} WITH THIS LINE WORKS
-  
+
   // WRITERS
   Utils.generateAllFiles(Set(graph),Set(w1),query)(scenario)
   QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = false)(query)(Set.empty)(Set(w1))
