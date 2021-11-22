@@ -194,3 +194,22 @@ object Wrapper {
   def apply(name:String): Wrapper = WrapperImpl("Wrapper" + name,Set.empty)
 
 }
+
+object Graph {
+  def allConcept(graph: Concept): Set[Concept] =
+    if(graph.linkedConcepts.isEmpty) Set(graph) else graph.linkedConcepts.flatMap(c => allConcept(c._2)) + graph
+
+  def allLevels(graph: Concept): Set[Level] =
+    graph match {
+      case l: Level => graph.linkedConcepts.flatMap(c => allLevels(c._2)) + l
+      case _ => graph.linkedConcepts.flatMap(c => allLevels(c._2))
+    }
+
+  def allFeatures(graph: Concept): Set[Feature] =
+    graph.linkedFeatures.map(_._2) ++ graph.linkedConcepts.flatMap(c => allFeatures(c._2))
+
+  def allMeasures(query: Concept): Set[Measure] =
+    query.linkedFeatures.collect(f => f._2 match {
+      case m:Measure => m
+    }) ++ query.linkedConcepts.flatMap(c => allMeasures(c._2))
+}
