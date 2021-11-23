@@ -26,7 +26,14 @@ object Utils {
     CUSTOM_CONFIGURATION_FILES.foreach(fileName => new File(buildScenarioPath(scenario) + fileName).createNewFile())
   }
 
-  def generateAllFiles(concepts: Set[Concept], wrappers: Set[Wrapper], query: Concept)(scenario: String): Unit = {
+  /**
+   * TODO: The query is not the expanded one
+   * @param concepts
+   * @param wrappers
+   * @param query
+   * @param scenario
+   */
+  def generateAllFiles(concepts: Set[Concept], wrappers: Set[Wrapper], query: Concept, graph: Concept)(scenario: String): Unit = {
     buildPath(scenario)
     val scenario_path = buildScenarioPath(scenario)
     println("Generating files in directory: " + scenario_path)
@@ -51,7 +58,8 @@ object Utils {
         csvWriter.close()
       }
     })
-    queryWriter.write(Query.generateQuery(query))
+    val expandedQuery = ImplicitAggregation.expandAggregationLevels(query)(graph)
+    queryWriter.write(Query.generateQuery(expandedQuery))
     // Closing
     globalGraphWriter.close()
     sourceGraphWriter.close()

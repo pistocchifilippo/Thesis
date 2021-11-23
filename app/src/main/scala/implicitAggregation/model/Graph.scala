@@ -20,11 +20,7 @@ case class IdFeature(name:String) extends Feature {
     super.stringify() + s"s:${name} rdfs:subClassOf sc:identifier\n"
 }
 case class GenericFeature(name:String) extends Feature
-case class Measure(name: String) extends Feature {
-  override def stringify(): String =
-    super.stringify() +
-      s"s:${name} rdf:type G:Measure\n"
-}
+case class Measure(name: String) extends Feature
 
 trait Concept extends GraphComponent {
   def linkedConcepts:Set[(Edge, Concept)]
@@ -159,6 +155,11 @@ object Concept {
   def linkedFeatureName(concept: Concept)(name: String):Feature =
     concept.linkedFeatures.filter(_._2.name == name).map(_._2).head
 
+  def copyConcept(concept: Concept)(linkedConcepts: Set[(Edge,Concept)])(linkedFeatures: Set[(Edge,Feature)]): Concept = concept match {
+    case GenericConcept(name,_,_) => GenericConcept(name,linkedConcepts,linkedFeatures)
+    case Level(name,_,_) => Level(name,linkedConcepts,linkedFeatures)
+  }
+
 }
 
 object Level {
@@ -208,8 +209,16 @@ object Graph {
   def allFeatures(graph: Concept): Set[Feature] =
     graph.linkedFeatures.map(_._2) ++ graph.linkedConcepts.flatMap(c => allFeatures(c._2))
 
-  def allMeasures(query: Concept): Set[Measure] =
-    query.linkedFeatures.collect(f => f._2 match {
+  def allMeasures(graph: Concept): Set[Measure] =
+    graph.linkedFeatures.collect(f => f._2 match {
       case m:Measure => m
-    }) ++ query.linkedConcepts.flatMap(c => allMeasures(c._2))
+    }) ++ graph.linkedConcepts.flatMap(c => allMeasures(c._2))
+
+  def getIdFromConcept(concept: Concept): scala.collection.immutable.Set[IdFeature] = concept.linkedFeatures.map(_._2).collect({
+    case f:IdFeature => f
+  })
+  
+  def copyAllGraph(graph: Concept): Concept = {
+    Concept.copyConcept(graph)(graph.linkedConcepts.map(edge => (edge._1,copyAllGraph(edge._2))))(graph.linkedFeatures)
+  }
 }

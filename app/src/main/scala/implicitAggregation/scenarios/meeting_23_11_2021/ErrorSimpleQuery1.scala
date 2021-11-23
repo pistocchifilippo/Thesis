@@ -9,8 +9,8 @@ object ErrorSimpleQuery1 extends App {
   // GRAPH DEFINITION
 
   // Features
-  val REGION = IdFeature("Region")
-  val COUNTRY = IdFeature("Country")
+  val REGION = IdFeature("Region_f")
+  val COUNTRY = IdFeature("Country_f")
   val REVENUE = Measure("Revenue")
 
   // Graph hierarchy
@@ -56,7 +56,7 @@ object ErrorSimpleQuery1 extends App {
       .hasAttribute{Attribute("country1") sameAs COUNTRY}
 
   // WRITERS
-  Utils.generateAllFiles(Set(Sales),Set(w1,w2,w4),q)(scenario)
+  Utils.generateAllFiles(Set(Sales),Set(w1,w2,w4),q,Sales)(scenario)
   QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = false)(q)(Set(avg))(Set(w1,w2,w4))
 
 }

@@ -1,5 +1,7 @@
 package implicitAggregation.model
 
+import implicitAggregation.model.Graph.copyAllGraph
+
 import java.util.Scanner
 
 object Query {
@@ -59,8 +61,23 @@ object TestQ extends App {
           }
       }
 
-
-  println(Query.generateQuery(Sales))
+  val q =
+    Concept("Sales")
+      .hasFeature {
+        REVENUE
+      }
+      .->("location") {
+        Concept("City")
+          .partOf {
+            Concept("Region")
+              .partOf {
+                Concept("Country")
+                  .hasFeature {
+                    COUNTRY
+                  }
+              }
+          }
+      }
 
 
 }

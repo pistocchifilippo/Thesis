@@ -1,7 +1,5 @@
 package implicitAggregation.model
 
-import implicitAggregation.model.ImplicitAggregation._
-
 object ImplicitAggregation {
 
   /**
@@ -23,7 +21,7 @@ object ImplicitAggregation {
    */
   def extractGroupByClauses(q:Concept): Set[Level] = q match {
     case l:Level => q.linkedConcepts.flatMap(c => extractGroupByClauses(c._2)) ++ {
-      if (getIdFromConcept(l).nonEmpty) Set(l) else Set.empty
+      if (Graph.getIdFromConcept(l).nonEmpty) Set(l) else Set.empty
     }
     case _ => q.linkedConcepts.flatMap(c => extractGroupByClauses(c._2))
   }
@@ -60,29 +58,6 @@ object ImplicitAggregation {
     case _ => q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(Set.empty))
   }
 
-  private def getIdFromConcept(concept: Concept): scala.collection.immutable.Set[IdFeature] = concept.linkedFeatures.map(_._2).collect({
-    case f:IdFeature => f
-  })
-
-//  def expandLevelIdentifiers(aggregationLevels: Set[Level])(q: Concept)(g: Concept): Concept = {
-//    q match {
-//      case l:Level => Level(l.name)
-//      case c:GenericConcept =>
-//    }
-//  }
-
-  def findFeature(levels: Set[Level])(g: Concept): Set[Feature] = {
-    if (g match {
-      case l: Level =>
-        val ex = l.linkedFeatures.map(_._2).collect({ case f: IdFeature => f }).nonEmpty && levels.map(_.name).contains(g.name)
-        println(ex,g.name)
-        ex
-      case _ => false
-    }) g.linkedFeatures.map(_._2).collect({ case f: IdFeature => f }) ++ g.linkedConcepts.flatMap(x => findFeature(levels)(x._2)) else {
-      g.linkedConcepts.flatMap(x => findFeature(levels)(x._2))
-    }
-  }
-
   def makeSqlQuery(functions:Set[AggregatingFunction],q:Concept,makeView:() => String): String =
     if(canAggregate(q)){
       val gbClauses = parseGBClauses(extractGroupByClauses(q))
@@ -91,6 +66,24 @@ object ImplicitAggregation {
     } else {
       makeView()
     }
+
+
+  /**
+   * All the [[Level]]'s identifier feature of lower granularity [[Level]]s of the same dimension of the queried one have to be included in the query
+   * Let's just expand all the possible features for each level for simplicity and let the algorithm cut the useless one.
+   * @param query
+   * @param graph
+   * @return The expanded query
+   */
+  def expandAggregationLevels(query: Concept)(graph: Concept): Concept = {
+    val concepts = query.linkedConcepts.flatMap(c => {
+      graph.linkedConcepts.find(c2 => c2._2.name == c._2.name) match {
+        case Some(a) => Set((c,a))
+        case None => Set.empty
+      }
+    })
+    Concept.copyConcept(query)(concepts.map(x => (x._1._1,expandAggregationLevels(x._1._2)(x._2._2))))(graph.linkedFeatures)
+  }
 }
 
 object TestAgg extends App{
@@ -135,5 +128,9 @@ object TestAgg extends App{
   val sum = AggregatingFunction("sum") aggregates REVENUE
 
   println(Graph.allMeasures(q2).map(_.name))
-
+  println(
+    Graph.allMeasures(
+      Graph.copyAllGraph(q2)
+    ).map(_.name)
+  )
 }

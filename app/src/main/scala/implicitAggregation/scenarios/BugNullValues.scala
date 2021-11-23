@@ -42,7 +42,7 @@ object BugNullValues extends App {
 //      .hasAttribute{Attribute("Income") sameAs INCOME} WITH THIS LINE WORKS
 
   // WRITERS
-  Utils.generateAllFiles(Set(graph),Set(w1),query)(scenario)
+  Utils.generateAllFiles(Set(graph),Set(w1),query,graph)(scenario)
   QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = false)(query)(Set.empty)(Set(w1))
 
 }
