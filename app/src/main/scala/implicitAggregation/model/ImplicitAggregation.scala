@@ -1,12 +1,15 @@
 package implicitAggregation.model
 
+/**
+ * This source file is containing the main step of the Implicit Aggregation algorithm
+ */
 object ImplicitAggregation {
 
   /**
    *
    * @param q The query
    * @return true if there is at least a GB clause, a measure and there aren't any [[GenericFeature]]
-   *         TODO: There may be IdFeature non liked to a level that shouldn't be accepted
+   *         TODO: There may be IdFeature non liked to a level that shouldn't be accepte
    */
   def canAggregate(q:Concept): Boolean =  extractGroupByClauses(q).nonEmpty && Graph.allMeasures(q).nonEmpty && !Graph.allFeatures(q).exists(f => f match {
     case _: Measure => false
@@ -37,8 +40,18 @@ object ImplicitAggregation {
     functions.map(f => (f,f.measures.intersect(measures)))
   }
 
+  /**
+   *
+   * @param levels of aggregation
+   * @return A [[String]] containing the GroupBy clauses in SQL syntax
+   */
   def parseGBClauses(levels: Set[Level]): String = levels.map(_.name).mkString(",")
 
+  /**
+   *
+   * @param functionAndMeasure
+   * @return A [[String]] containing the aggregation operator in SQL syntax
+   */
   def parseAggregationClauses(functionAndMeasure:Set[(AggregatingFunction,Set[Measure])]): String =
     functionAndMeasure.flatMap(e => e._2.map(c => s"${e._1.name}(${c.name}) as ${c.name}")).mkString(",")
 
@@ -58,6 +71,13 @@ object ImplicitAggregation {
     case _ => q.linkedConcepts.flatMap(c => aggregationLevels(c._2)(Set.empty))
   }
 
+  /**
+   * This function contain the instructions flow of the algorithm
+   * @param functions
+   * @param q
+   * @param makeView is a function [[() => String]] that generates the view in SQL syntax
+   * @return A [[String]] containing the complete query in SQL syntax
+   */
   def makeSqlQuery(functions:Set[AggregatingFunction],q:Concept,makeView:() => String): String =
     if(canAggregate(q)){
       val gbClauses = parseGBClauses(extractGroupByClauses(q))
