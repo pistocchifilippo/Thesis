@@ -11,11 +11,23 @@ object ImplicitAggregation {
    * @return true if there is at least a GB clause, a measure and there aren't any [[GenericFeature]]
    *         TODO: There may be IdFeature non liked to a level that shouldn't be accepte
    */
-  def canAggregate(q:Concept): Boolean =  extractGroupByClauses(q).nonEmpty && Graph.allMeasures(q).nonEmpty && !Graph.allFeatures(q).exists(f => f match {
-    case _: Measure => false
-    case _: IdFeature => false
-    case _ => true
-  })
+  def canAggregate(q:Concept): Boolean =  extractGroupByClauses(q).nonEmpty && Graph.allMeasures(q).nonEmpty && Graph.allConcept(q).map(c => c match {
+    case l:Level =>
+      l.linkedFeatures.map(_._2).filter(x => x match {
+      case _: Measure => false
+      case _: IdFeature => false
+      case _ => true
+    }).isEmpty
+    case _ => c.linkedFeatures.map(_._2).filter(x => x match {
+      case _: Measure => false
+      case _ => true
+    }).isEmpty
+  }).foldRight(true)(_ && _)
+//    !Graph.allFeatures(q).exists(f => f match {
+//    case _: Measure => false
+//    case _: IdFeature => false
+//    case _ => true
+//  })
 
   /**
    *
@@ -132,6 +144,7 @@ object TestAgg extends App{
 
   val q2 =
     Concept("Sales")
+      .hasFeature(REGION)
       .hasFeature{REVENUE}
       .partOf{
         Level("City")
@@ -146,6 +159,8 @@ object TestAgg extends App{
 
   val avg = AggregatingFunction("avg") aggregates REVENUE
   val sum = AggregatingFunction("sum") aggregates REVENUE
+
+  println(ImplicitAggregation.canAggregate(q2))
 
   println(Graph.allMeasures(q2).map(_.name))
   println(
