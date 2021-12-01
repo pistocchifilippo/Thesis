@@ -62,6 +62,6 @@ object LUT extends App {
 
   // WRITERS
   Utils.generateAllFiles(Set(Sales),Set(w1,w2,w3,w4,w5),q,Sales)(scenario)
-  QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = true)(q)(Set(avg))(Set(w1,w2,w3,w4,w5))
+  QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = false)(q)(Set(avg))(Set(w1,w2,w3,w4,w5))
 
 }

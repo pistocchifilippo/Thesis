@@ -6,13 +6,14 @@ import java.util.Scanner
 object Mapping {
 
   def mapping(features:Set[Feature], graph: Concept, conceptPath: Set[String]):Set[String] = {
+    val rdfTypeConcept = Set(s"s:${graph.name} rdf:type G:Concept")
     val featureMappings = {
       if (graph.linkedFeatures.map(f => features.contains(f._2)).foldRight(false)(_ || _)) {
         graph.linkedFeatures.filter(f => features.contains(f._2)).flatMap(f =>
           f._2 match {
-            case IdFeature(name) => Set(s"s:${graph.name} G:hasFeature s:$name", s"s:$name rdfs:subClassOf sc:identifier")
-            case GenericFeature(name) => Set(s"s:${graph.name} G:hasFeature s:$name")
-            case Measure(name) => Set(s"s:${graph.name} G:hasFeature s:$name")
+            case IdFeature(name) => Set(s"s:${graph.name} G:hasFeature s:$name", s"s:$name rdfs:subClassOf sc:identifier", s"s:$name rdf:type G:Feature")
+            case GenericFeature(name) => Set(s"s:${graph.name} G:hasFeature s:$name", s"s:$name rdf:type G:Feature")
+            case Measure(name) => Set(s"s:${graph.name} G:hasFeature s:$name", s"s:$name rdf:type G:Feature")
           }
         )
       } else {
@@ -40,7 +41,7 @@ object Mapping {
       } else {
         Set.empty
       }
-    featureMappings ++ conceptMappings ++ aggConceptPath
+    featureMappings ++ conceptMappings ++ aggConceptPath ++ rdfTypeConcept
   }
 
   def intoLines(mapping: Set[String])(globalGraphPath: String): List[Int] = {
