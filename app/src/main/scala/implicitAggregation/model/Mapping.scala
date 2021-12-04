@@ -6,7 +6,6 @@ import java.util.Scanner
 object Mapping {
 
   def mapping(features:Set[Feature], graph: Concept, conceptPath: Set[String]):Set[String] = {
-    val rdfTypeConcept = Set(s"s:${graph.name} rdf:type G:Concept")
     val featureMappings = {
       if (graph.linkedFeatures.map(f => features.contains(f._2)).foldRight(false)(_ || _)) {
         graph.linkedFeatures.filter(f => features.contains(f._2)).flatMap(f =>
@@ -33,15 +32,15 @@ object Mapping {
           if (conceptPath.isEmpty && featureMappings.isEmpty){
             Set.empty
           } else if (aggConceptPath.nonEmpty) {
-            Set(s"s:${graph.name} s:${c._1.name} s:${c._2.name}")
+            Set(s"s:${graph.name} s:${c._1.name} s:${c._2.name}", s"s:${graph.name} rdf:type G:Concept", s"s:${c._2.name} rdf:type G:Concept")
           } else {
-            conceptPath + s"s:${graph.name} s:${c._1.name} s:${c._2.name}"
+            conceptPath ++ Set(s"s:${graph.name} s:${c._1.name} s:${c._2.name}", s"s:${graph.name} rdf:type G:Concept", s"s:${c._2.name} rdf:type G:Concept")
           }
         ))
       } else {
         Set.empty
       }
-    featureMappings ++ conceptMappings ++ aggConceptPath ++ rdfTypeConcept
+    featureMappings ++ conceptMappings ++ aggConceptPath
   }
 
   def intoLines(mapping: Set[String])(globalGraphPath: String): List[Int] = {
