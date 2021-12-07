@@ -27,7 +27,7 @@ public class Tuple2<X, Y> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        edu.upc.essi.dtim.nextiaqr.utils.Tuple2<?, ?> tuple2 = (edu.upc.essi.dtim.nextiaqr.utils.Tuple2<?, ?>) o;
+        Tuple2<?, ?> tuple2 = (Tuple2<?, ?>) o;
         return Objects.equal(_1, tuple2._1) &&
                 Objects.equal(_2, tuple2._2);
     }

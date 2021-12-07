@@ -31,8 +31,8 @@ public class Tuple3<X, Y, Z> {
     }
     @Override
     public boolean equals(Object o) {
-        if (o instanceof edu.upc.essi.dtim.nextiaqr.utils.Tuple3) {
-            final edu.upc.essi.dtim.nextiaqr.utils.Tuple3 other = (edu.upc.essi.dtim.nextiaqr.utils.Tuple3)o;
+        if (o instanceof Tuple3) {
+            final Tuple3 other = (Tuple3)o;
             return Objects.equals(_1,other._1) && Objects.equals(_2,other._2) && Objects.equals(_3,other._3);
         }
         else {

@@ -1,14 +1,12 @@
 package edu.upc.essi.dtim.nextiaqr.utils;
 
 import edu.upc.essi.dtim.nextiaqr.jena.GraphOperations;
-import edu.upc.essi.dtim.nextiaqr.models.querying.Wrapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import edu.upc.essi.dtim.nextiaqr.models.querying.Wrapper;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+
+import java.sql.*;
 
 public class SQLiteUtils {
 

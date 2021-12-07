@@ -9,6 +9,7 @@ import edu.upc.essi.dtim.nextiaqr.models.querying.wrapper_impl.CSV_Wrapper;
 import edu.upc.essi.dtim.nextiaqr.utils.SQLiteUtils;
 import org.apache.jena.query.Dataset;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ public class NextiaQR {
     }
 
     public static String toSQL (Set<ConjunctiveQuery> UCQ, Map<String,String> namesLut) {
+        if (UCQ.isEmpty()) return null;
         StringBuilder SQL = new StringBuilder();
         UCQ.forEach(q -> {
             StringBuilder select = new StringBuilder("SELECT ");
@@ -39,14 +41,12 @@ public class NextiaQR {
             //Now do the sorting
             List<String> projections = Lists.newArrayList(withoutDuplicates);//Lists.newArrayList(q.getProjections());
             //projections.sort(Comparator.comparingInt(s -> listOfFeatures.indexOf(QueryRewriting.featuresPerAttribute.get(s))));
-//            projections.forEach(proj -> System.out.println(namesLut.get(GraphOperations.nn(proj))));
+            projections.sort(Comparator.comparingInt(s -> QueryRewriting.projectionOrder.get(QueryRewriting.featuresPerAttribute.get(s))));
             if (namesLut != null) {
                 projections.forEach(proj -> select.append(""+GraphOperations.nn(proj).split("/")[GraphOperations.nn(proj).split("/").length-1]+""+" as " + namesLut.get(GraphOperations.nn(proj)) + ","));
             } else {
                 projections.forEach(proj -> select.append("\""+GraphOperations.nn(proj).split("/")[GraphOperations.nn(proj).split("/").length-1]+"\""+","));
-
-            }
-            //q.getWrappers().forEach(w -> from.append(wrapperIriToID.get(w.getWrapper())+","));
+            }            //q.getWrappers().forEach(w -> from.append(wrapperIriToID.get(w.getWrapper())+","));
             q.getWrappers().forEach(w -> from.append(GraphOperations.nn(w.getWrapper())+","));
             q.getJoinConditions().forEach(j -> where.append(
                     "\""+GraphOperations.nn(j.getLeft_attribute()).split("/")[GraphOperations.nn(j.getLeft_attribute()).split("/").length-1]+"\""+
@@ -65,28 +65,32 @@ public class NextiaQR {
     }
 
     public static void executeSQL(Set<ConjunctiveQuery> UCQs, String SQL) {
-        Set<Wrapper> wrappersInUCQs = UCQs.stream().map(cq -> cq.getWrappers()).flatMap(wrappers -> wrappers.stream()).collect(Collectors.toSet());
+        if (UCQs.isEmpty() || SQL == null) {
+            System.out.println("The UCQ is empty, no output is generated");
+        } else {
+            Set<Wrapper> wrappersInUCQs = UCQs.stream().map(cq -> cq.getWrappers()).flatMap(wrappers -> wrappers.stream()).collect(Collectors.toSet());
 
-        Set<CSV_Wrapper> CSVWrappers = wrappersInUCQs.stream().map(w -> (CSV_Wrapper)w).collect(Collectors.toSet());
+            Set<CSV_Wrapper> CSVWrappers = wrappersInUCQs.stream().map(w -> (CSV_Wrapper) w).collect(Collectors.toSet());
 
-        CSVWrappers.forEach(w -> {
-            try {
-                w.inferSchema();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            CSVWrappers.forEach(w -> {
+                try {
+                    w.inferSchema();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
 
-        CSVWrappers.forEach(w -> {
-            SQLiteUtils.createTable(w);
-            try {
-                w.populate();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        System.out.println(SQL);
-        System.out.println(SQLiteUtils.executeSelect(SQL));
+            CSVWrappers.forEach(w -> {
+                SQLiteUtils.createTable(w);
+                try {
+                    w.populate();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            System.out.println(SQL);
+            System.out.println(SQLiteUtils.executeSelect(SQL));
+        }
         //SQLiteUtils.executeSelect(SQL).forEach(d -> data.add(d));
 
         /*

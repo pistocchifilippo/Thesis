@@ -46,7 +46,7 @@ public class CQVertex {
             return Objects.equal((String)o,label);
         }
         if (o == null || getClass() != o.getClass()) return false;
-        edu.upc.essi.dtim.nextiaqr.models.graph.CQVertex cqVertex = (edu.upc.essi.dtim.nextiaqr.models.graph.CQVertex) o;
+        CQVertex cqVertex = (CQVertex) o;
         return Objects.equal(label, cqVertex.label);
     }
 

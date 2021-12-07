@@ -34,7 +34,7 @@ public class Utils {
     }
 
     public static InputStream getResourceAsStream(String filename) {
-        InputStream in = edu.upc.essi.dtim.nextiaqr.utils.Utils.class.getClassLoader().getResourceAsStream(filename);
+        InputStream in = Utils.class.getClassLoader().getResourceAsStream(filename);
         return in;
     }
 

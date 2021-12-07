@@ -52,8 +52,8 @@ public class ConjunctiveQuery implements Comparable {
 
     @Override
     public boolean equals(Object o) { //Query equivalence
-        if (o instanceof edu.upc.essi.dtim.nextiaqr.models.querying.ConjunctiveQuery) {
-            final edu.upc.essi.dtim.nextiaqr.models.querying.ConjunctiveQuery other = (edu.upc.essi.dtim.nextiaqr.models.querying.ConjunctiveQuery)o;
+        if (o instanceof ConjunctiveQuery) {
+            final ConjunctiveQuery other = (ConjunctiveQuery)o;
             return //Objects.equals(projections,other.projections) &&
                     joinConditions.equals(other.getJoinConditions()) &&
                     wrappers.equals(other.getWrappers());
@@ -87,6 +87,6 @@ public class ConjunctiveQuery implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return Integer.compare(this.getWrappers().size(),((edu.upc.essi.dtim.nextiaqr.models.querying.ConjunctiveQuery)o).getWrappers().size() );
+        return Integer.compare(this.getWrappers().size(),((ConjunctiveQuery)o).getWrappers().size() );
     }
 }

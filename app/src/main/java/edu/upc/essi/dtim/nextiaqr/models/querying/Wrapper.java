@@ -30,8 +30,8 @@ public class Wrapper extends RelationalOperator {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof edu.upc.essi.dtim.nextiaqr.models.querying.Wrapper) {
-            final edu.upc.essi.dtim.nextiaqr.models.querying.Wrapper other = (edu.upc.essi.dtim.nextiaqr.models.querying.Wrapper)o;
+        if (o instanceof Wrapper) {
+            final Wrapper other = (Wrapper)o;
             return Objects.equals(wrapper,other.wrapper);
         } else {
             return false;

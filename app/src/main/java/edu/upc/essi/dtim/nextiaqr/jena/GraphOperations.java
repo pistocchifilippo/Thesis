@@ -108,10 +108,10 @@ public class GraphOperations {
     /**
      * NextiaQR methods
      */
-    private static edu.upc.essi.dtim.nextiaqr.jena.GraphOperations instance = null;
+    private static GraphOperations instance = null;
 
-    public static edu.upc.essi.dtim.nextiaqr.jena.GraphOperations getInstance(String jenaPath) {
-        if (instance == null) instance = new edu.upc.essi.dtim.nextiaqr.jena.GraphOperations(jenaPath);
+    public static GraphOperations getInstance(String jenaPath) {
+        if (instance == null) instance = new GraphOperations(jenaPath);
         return instance;
     }
 

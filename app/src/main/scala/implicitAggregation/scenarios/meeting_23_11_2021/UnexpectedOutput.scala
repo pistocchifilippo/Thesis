@@ -47,6 +47,6 @@ object UnexpectedOutput extends App {
 
   // WRITERS
   Utils.generateAllFiles(Set(Sales),Set(w1,w2,w4),q,Sales)(scenario)
-  QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = false)(q)(Set(avg))(Set(w1,w2,w4))
+  QueryExecution.execute(scenario,Utils.SCENARIOS_PATH,makeImplicitAggregation = true)(q)(Set(avg))(Set(w1,w2,w4))
 
 }

@@ -44,7 +44,7 @@ public class IntegrationEdge extends DefaultEdge {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        edu.upc.essi.dtim.nextiaqr.models.graph.IntegrationEdge cqVertex = (edu.upc.essi.dtim.nextiaqr.models.graph.IntegrationEdge) o;
+        IntegrationEdge cqVertex = (IntegrationEdge) o;
         return getSource().equals(cqVertex.getSource()) && getTarget().equals(cqVertex.getTarget());
         //return Objects.equal(label, cqVertex.label);
     }

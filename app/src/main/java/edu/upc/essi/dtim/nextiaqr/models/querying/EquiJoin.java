@@ -36,8 +36,8 @@ public class EquiJoin extends RelationalOperator {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof edu.upc.essi.dtim.nextiaqr.models.querying.EquiJoin) {
-            final edu.upc.essi.dtim.nextiaqr.models.querying.EquiJoin other = (edu.upc.essi.dtim.nextiaqr.models.querying.EquiJoin)o;
+        if (o instanceof EquiJoin) {
+            final EquiJoin other = (EquiJoin)o;
             return (left_attribute.equals(other.getLeft_attribute()) && right_attribute.equals(other.getRight_attribute())) ||
                    (left_attribute.equals(other.getRight_attribute()) && right_attribute.equals(other.getLeft_attribute()));
             /*return (Objects.equals(left_attribute,other.left_attribute) &&
