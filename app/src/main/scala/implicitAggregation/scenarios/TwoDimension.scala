@@ -1,19 +1,22 @@
 package implicitAggregation.scenarios
-
 import implicitAggregation.dsl.Scenario
 import implicitAggregation.model._
 
-class UnexpectedOutputScenario extends Scenario {
+class TwoDimension extends Scenario {
 
-  scenario{
-    "UnexpectedOutput"
+  scenario {
+    "TwoDimension"
   }
 
   val REGION = IdFeature("Region")
   val COUNTRY = IdFeature("Country")
+
+  val NAME = IdFeature("Name")
+  val CATEGORY = IdFeature("Category")
+
   val REVENUE = Measure("Revenue")
 
-  targetGraph{
+  targetGraph {
     Concept("Sales")
       .hasFeature {
         REVENUE
@@ -30,9 +33,22 @@ class UnexpectedOutputScenario extends Scenario {
               }
           }
       }
+      .->("product") {
+        Level("Name")
+          .hasFeature {
+            NAME
+          }
+          .partOf {
+            Level("Category")
+              .hasFeature {
+                CATEGORY
+              }
+          }
+      }
+
   }
 
-  wrapper{
+  wrapper {
     Wrapper("W1")
       .hasAttribute {
         Attribute("country") sameAs COUNTRY
@@ -42,7 +58,7 @@ class UnexpectedOutputScenario extends Scenario {
       }
   }
 
-  wrapper{
+  wrapper {
     Wrapper("W2")
       .hasAttribute {
         Attribute("region") sameAs REGION
@@ -52,8 +68,8 @@ class UnexpectedOutputScenario extends Scenario {
       }
   }
 
-  wrapper{
-    Wrapper("LUT")
+  wrapper {
+    Wrapper("LUT1")
       .hasAttribute {
         Attribute("region1") sameAs REGION
       }
@@ -62,12 +78,42 @@ class UnexpectedOutputScenario extends Scenario {
       }
   }
 
-  aggregation{
+  wrapper {
+    Wrapper("W3")
+      .hasAttribute {
+        Attribute("name") sameAs NAME
+      }
+      .hasAttribute {
+        Attribute("revenue3") sameAs REVENUE
+      }
+  }
+
+  wrapper {
+    Wrapper("W4")
+      .hasAttribute {
+        Attribute("category") sameAs CATEGORY
+      }
+      .hasAttribute {
+        Attribute("revenue4") sameAs REVENUE
+      }
+  }
+
+  wrapper {
+    Wrapper("LUT2")
+      .hasAttribute {
+        Attribute("name1") sameAs NAME
+      }
+      .hasAttribute {
+        Attribute("category1") sameAs CATEGORY
+      }
+  }
+
+  aggregation {
     AggregatingFunction("avg") aggregates REVENUE
   }
 
 }
 
-object UnexpectedOutput extends App {
-  new UnexpectedOutputScenario().run(false)
+object TwoDimension extends App {
+  new TwoDimension().run(false)
 }
