@@ -31,6 +31,8 @@ TestScenarioRunnerDataset/
 
 nexitaqr.db
 
+NextiaQR/*
+
 .DS_Store
 
 out
