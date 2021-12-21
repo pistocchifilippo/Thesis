@@ -20,23 +20,26 @@ val COUNTRY = IdFeature("Country")
 val NAME = IdFeature("Name")
 val CATEGORY = IdFeature("Category")
 val REVENUE = Measure("Revenue")
+
 val multidimensionalGraph =
    Concept("Sales")
-    .hasFeature {REVENUE}
-    .->("location") { // Concept to concept/level relationship
+   .hasFeature {REVENUE}
+   .->("location") { // Concept to concept/level relationship
       Level("Region")
-       .hasFeature {REGION}
-       .partOf { // Level to level relationship
+      .hasFeature {REGION}
+      .partOf { // Level to level relationship
          Level("Country")
-          .hasFeature {COUNTRY}
-} }
-    .->("product") {
+         .hasFeature {COUNTRY}
+      } 
+   }
+   .->("product") {
       Level("Name")
-       .hasFeature {NAME}
-       .partOf {
+      .hasFeature {NAME}
+      .partOf {
          Level("Category")
-          .hasFeature {CATEGORY}
-} }
+         .hasFeature {CATEGORY}
+      } 
+   }
 
 ```
 
@@ -44,7 +47,7 @@ Source graph definition:
 ``` scala
 val w1 =
    Wrapper("W1")
-     .hasAttribute {
+   .hasAttribute {
       Attribute("country") sameAs COUNTRY
     }
     .hasAttribute {
@@ -52,29 +55,29 @@ val w1 =
     }
     .hasAttribute {
       Attribute("revenue") sameAs REVENUE
-}
+    }
 
 ```
 
 Scenario definition:
 ``` scala
 class ScenarioName extends Scenario {
- scenario {
-   "ScenarioName"
+   scenario {
+      "ScenarioName"
+   }
+   targetGraph{
+      // The target graph
+   }
+   wrapper {
+      // One wrapper, if there are more than one repeat this block
+   }
+   query {
+      // The query
+   }
+   aggregation {
+      // One aggregation function, if there are more than one repeat this block
+   } 
 }
- targetGraph{
-   // The target graph
-}
-wrapper {
-   // One wrapper, if there are more than one repeat this block
-}
-query {
-// The query
-}
- aggregation {
-   // One aggregation function, if there are more than one repeat
-      this block
-  } }
 
 ```
 
