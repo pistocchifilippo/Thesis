@@ -1,3 +1,8 @@
+![GitHub contributors](https://img.shields.io/github/contributors/pistocchifilippo/Thesis)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/pistocchifilippo/Thesis/master)
+![GitHub](https://img.shields.io/github/license/pistocchifilippo/Thesis)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/pistocchifilippo/Thesis)
+
 # Implicit Roll-Up
 
 This project is related to my master thesis "Implicit Roll-Up over graph based data integration systems" carried out in Universitat Politècnica de Catalunya - UPC upon FIB Data Science department.
