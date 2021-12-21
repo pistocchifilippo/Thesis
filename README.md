@@ -44,7 +44,6 @@ Source graph definition:
 ``` scala
 val w1 =
    Wrapper("W1")
-Listing 6.2: My Caption
      .hasAttribute {
       Attribute("country") sameAs COUNTRY
     }
@@ -82,8 +81,8 @@ query {
 Run scenario:
 ``` scala
 object ScenarioName extends App {
- new ScenarioName().run(executeImplicitRollUp = true)
- }
+   new ScenarioName().run(executeImplicitRollUp = true)
+}
 
 ```
 ## Authors
