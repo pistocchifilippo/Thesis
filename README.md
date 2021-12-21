@@ -1,13 +1,16 @@
 # Implicit Roll-Up
 
 This project is related to my master thesis "Implicit Roll-Up over graph based data integration systems" carried out in Universitat Politècnica de Catalunya - UPC upon FIB Data Science department.
-This project is an extension of the project [GFDM](https://github.com/pistocchifilippo/NextiaQR) system, that have also been developed by the reserach group I have been working with.
+This project is an extension of the project [NexitaQR](https://github.com/pistocchifilippo/NextiaQR) system, that have also been developed by the reserach group I have been working with.
 In this repository you can expect to find the following:
 
 1. An OO model able to represent any kind of graph that can be described in NextiaQR.
 2. An implementation of the Implicit Roll-Up algorithm.
 3. A DSL able to define a running scenario.
 4. A DSL able to define an integration graph.
+
+## Dependencies
+This project have a dependency with [NexitaQR](https://github.com/pistocchifilippo/NextiaQR), that's why it will be necessary to generate and import the jar file of NexitaQR in the directory `app/NextiaQR/NextiaQR-1.0-SNAPSHOT.jar` (dependecy already in `build.gradle`).
 
 ## Basic example
 Will follow a basic example of a simple run of the project.
