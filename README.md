@@ -15,7 +15,8 @@ In this repository you can expect to find the following:
 4. A DSL able to define an integration graph.
 
 ## Dependencies
-This project have a dependency with [NexitaQR](https://github.com/pistocchifilippo/NextiaQR), that's why it will be necessary to generate and import the jar file of NexitaQR in the directory `app/NextiaQR/NextiaQR-1.0-SNAPSHOT.jar` (dependecy already in `build.gradle`).
+This project have a dependency with [NexitaQR](https://github.com/pistocchifilippo/NextiaQR), that's why it will be necessary to generate and import the jar file of NexitaQR in the directory `app/NextiaQR/NextiaQR-1.0-SNAPSHOT.jar`, [here](https://github.com/pistocchifilippo/Thesis/tree/master/app).
+The dependecy is already imported in `build.gradle`.
 
 ## Basic example
 Will follow a basic example of a simple run of the project.
