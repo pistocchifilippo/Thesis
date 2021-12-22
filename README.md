@@ -81,7 +81,7 @@ class ScenarioName extends Scenario {
       // One wrapper, if there are more than one repeat this block
    }
    query {
-      // The query
+      // The query in the form of graph
    }
    aggregation {
       // One aggregation function, if there are more than one repeat this block
