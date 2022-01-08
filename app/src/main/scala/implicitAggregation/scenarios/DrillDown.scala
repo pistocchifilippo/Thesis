@@ -3,10 +3,9 @@ package implicitAggregation.scenarios
 import implicitAggregation.dsl.Scenario
 import implicitAggregation.model._
 
-class UnexpectedOutputScenario extends Scenario {
-
+class DrillDown extends Scenario {
   scenario{
-    "UnexpectedOutput"
+    "DrillDown"
   }
 
   val REGION = IdFeature("Region")
@@ -38,9 +37,6 @@ class UnexpectedOutputScenario extends Scenario {
         Attribute("country") sameAs COUNTRY
       }
       .hasAttribute {
-        Attribute("region2") sameAs REGION
-      }
-      .hasAttribute {
         Attribute("revenue") sameAs REVENUE
       }
   }
@@ -65,12 +61,7 @@ class UnexpectedOutputScenario extends Scenario {
       }
   }
 
-  aggregation{
-    AggregatingFunction("avg") aggregates REVENUE
-  }
-
 }
-
-object UnexpectedOutput extends App {
-  new UnexpectedOutputScenario().run(false)
-}
+ object DrillDown extends App {
+   new DrillDown().run(false)
+ }
