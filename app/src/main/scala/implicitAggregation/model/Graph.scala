@@ -80,6 +80,10 @@ case class Level(
 //      s"s:${name} rdf:type G:Level\n"
 }
 
+case class Fact(
+                 name:String,linkedConcepts: Set[(Edge, Concept)],linkedFeatures: Set[(Edge, Feature)]
+               ) extends BaseConcept
+
 trait AggregatingFunction extends BaseConcept {
   def measures: Set[Measure]
   def aggregates(measure: Measure): AggregatingFunction
@@ -164,6 +168,10 @@ object Concept {
 
 object Level {
   def apply(name: String): Level = Level(name,Set.empty,Set.empty)
+}
+
+object Fact {
+  def apply(name: String): Fact = Fact(name,Set.empty,Set.empty)
 }
 
 object Attribute {
