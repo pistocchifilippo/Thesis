@@ -1,0 +1,311 @@
+package implicitAggregation.model
+
+/**
+ * Assumptions, query in the form of: concept with directly attached the dimensions
+ */
+object ImplicitRollUp {
+
+  def executeImplicitRollUp(functions:Set[AggregatingFunction],query: Concept, graph: Concept,scenario:String,basePath:String)(makeImplicitRollUp: Boolean)(generateConfigurationFiles: List[Concept] => Unit)(wrappers: Set[Wrapper]): String = {
+    if(canAggregate(query) && makeImplicitRollUp){
+      val allDimensionQueries_ = allDimensionQueries(query,graph)
+      val rollUpQueries_ = query :: rollUpQueries(query,allDimensionQueries_)
+      generateConfigurationFiles(rollUpQueries_)
+      Thread.sleep(5000)
+      val p = QueryManager.prepare(scenario,basePath)
+      val scenarioPath = p._1
+      val T = p._2
+      val queries = p._3
+      // read all the query and for each:
+      val CQs = QueryManager.executeRollUpQueries(queries,T,makeImplicitRollUp = true)
+      println(CQs)
+
+        // rewrite (make the query having just the higher level gran id otherwise fail)
+        // generate sql
+        // wrap sql
+        // return a set of wrapper query
+      // make the UNION of the queries
+      // run the final query
+      val gbClauses = parseGBClauses(extractGroupByClauses(query))
+      val aggClauses = parseAggregationClauses(extractAggregationClauses(functions,query))
+      null
+    } else {
+      generateConfigurationFiles(List(query))
+      Thread.sleep(5000)
+      val p = QueryManager.prepare(scenario,basePath)
+      val scenarioPath = p._1
+      val T = p._2
+      val queries = p._3
+      println("NO Aggregation")
+
+      val CQs = QueryManager.executeRollUpQueries(queries,T,makeImplicitRollUp = false)
+//      println(
+//        QueryManager.toSql(CQs.head,scenarioPath,true)(wrappers)
+//      )
+      null
+    }
+  }
+
+  def canAggregate(query: Concept): Boolean = extractGroupByClauses(query).nonEmpty && Graph.allMeasures(query).nonEmpty
+//  def canAggregate(query: Concept): Boolean = extractGroupByClauses(query).nonEmpty && Graph.allMeasures(query).nonEmpty && Graph.allConcept(query).map {
+//    case l: Level =>
+//      !l.linkedFeatures.map(_._2).exists(x => x match {
+//        case _: Measure => false
+//        case _: IdFeature => false
+//        case _ => true
+//      })
+//    case c => !c.linkedFeatures.map(_._2).exists(x => x match {
+//      case _: Measure => false
+//      case _ => true
+//    })
+//  }.foldRight(true)(_ && _)
+
+  /**
+   * Assumes there is just one [[IdFeature]] for each level and that the last queried level contains and [[IdFeature]].
+   * @param q The query
+   * @return All the [[Level]]s in a query having an [[IdFeature]]
+   */
+  def extractGroupByClauses(query: Concept): Set[Level] = allDimensions(query).map(d => higherGranularityLevel(d._2)).filter(l => l.linkedFeatures.exists(f => f._2 match {
+    case _:IdFeature => true
+    case _ => false
+  }))
+
+  /**
+   *
+   * @param functions The aggregating functions
+   * @param q The query
+   * @return All the [[AggregatingFunction]] and their related [[Measure]]
+   */
+  def extractAggregationClauses(functions:Set[AggregatingFunction], q:Concept): Set[(AggregatingFunction,Set[Measure])] = {
+    val measures = Graph.allMeasures(q)
+    functions.map(f => (f,f.measures.intersect(measures)))
+  }
+
+  /**
+   *
+   * @param levels of aggregation
+   * @return A [[String]] containing the GroupBy clauses in SQL syntax
+   */
+  def parseGBClauses(levels: Set[Level]): String = levels.map(_.name).mkString(",")
+
+  /**
+   *
+   * @param functionAndMeasure
+   * @return A [[String]] containing the aggregation operator in SQL syntax
+   */
+  def parseAggregationClauses(functionAndMeasure:Set[(AggregatingFunction,Set[Measure])]): String =
+    functionAndMeasure.flatMap(e => e._2.map(c => s"${e._1.name}(${c.name}) as ${c.name}")).mkString(",")
+
+  /**
+   * Detach all the dimensions from the query
+   * @param query
+   * @return The query without the dimensions
+   */
+  def pruneQueryDimensions(query: Concept): Concept = Concept.copyConcept(query)(query.linkedConcepts.filter(e => e._2 match {
+    case _:Level => false
+    case _ => true
+  }))(query.linkedFeatures)
+
+  /**
+   * Extracts the entire dimension from the graph
+   * @param level is the dimension name that will be extracted
+   * @param graph
+   * @return
+   */
+  def extractDimension(level: Level, graph: Concept): Option[Level] = graph.linkedConcepts.map(_._2).collect{case l:Level => l}.find(_.name == level.name)
+
+  /**
+   *
+   * @param prunedGraphDimension the dimension in the graph pruned and aligned to the query dimension
+   * @return all the dimension combination
+   */
+  def generateDimensionQueries(prunedGraphDimension: Level): Set[Level] = {
+    val nextPrunedId = removeFirstRemovableId(prunedGraphDimension)
+      Set(prunedGraphDimension) ++ {
+        if (higherGranularityLevel(nextPrunedId).linkedFeatures.isEmpty) Set.empty else
+          Set(nextPrunedId) ++ generateDimensionQueries(nextPrunedId)
+      }
+  }
+
+  def removeFirstRemovableId(dimension: Level): Level = {
+    {
+      if (dimension.linkedFeatures.isEmpty && dimension.linkedConcepts.nonEmpty) {
+        Concept.copyConcept(dimension)(Set((Edge("partOf"), removeFirstRemovableId(dimension.linkedConcepts.head._2.asInstanceOf[Level]))))(Set.empty)
+      } else {
+        Concept.copyConcept(dimension)(dimension.linkedConcepts)(Set.empty)
+      }
+    }.asInstanceOf[Level]
+
+  }
+
+  def allDimensionQueries(query: Concept, graph: Concept): List[List[Level]] = {
+    val queryDimensions = allDimensions(query)
+
+    // The dimension query
+    val allDimensionQueries = queryDimensions.map(d => {
+      val queryDimension = d._2
+      val graphDimension = extractDimension(queryDimension, graph)
+      val prunedGraphDimension = pruneGraphDimension(queryDimension,graphDimension.get)
+      val queries = generateDimensionQueries(prunedGraphDimension)
+      (d._1,queries)
+    })
+
+    val l = allDimensionQueries.map(q => q._2.toList).toList
+    l
+  }
+
+  def rollUpQueries(query: Concept, dimensionQueries: List[List[Concept]]): List[Concept] = {
+    def crossJoin[T](list: List[List[T]]): List[List[T]] =
+      list match {
+        case xs :: Nil => xs map (List(_))
+        case x :: xs => for {
+          i <- x
+          j <- crossJoin(xs)
+        } yield List(i) ++ j
+      }
+
+    val detachedQuery = pruneQueryDimensions(query)
+
+    val cross = crossJoin(dimensionQueries)
+
+    val rollUpQueries = cross.map(q => Concept.copyConcept(detachedQuery)(q.map(e => (Edge("D"),e.asInstanceOf[Concept])).toSet)(detachedQuery.linkedFeatures))
+    rollUpQueries
+  }
+
+  /**
+   * Assume each level has just one partOf relationship
+   * @param queryDimension
+   * @param graphDimension
+   * @return
+   */
+  def pruneGraphDimension(queryDimension: Level, graphDimension: Level): Level = {
+    val prunedLinkedConceptsQ = pruneLinkedConcepts(queryDimension.linkedConcepts)
+    val prunedLinkedConceptsG = pruneLinkedConcepts(graphDimension.linkedConcepts)
+    val nextLevelQ = prunedLinkedConceptsQ.map(_._2).headOption.asInstanceOf[Option[Level]]
+    val nextLevelG = prunedLinkedConceptsG.map(_._2).headOption.asInstanceOf[Option[Level]]
+
+    if (nextLevelQ.nonEmpty) {
+      Concept.copyConcept(graphDimension)(Set((Edge("partOf"),pruneGraphDimension(nextLevelQ.get,nextLevelG.get).asInstanceOf[Concept])))(graphDimension.linkedFeatures.filter(e => e._2 match {
+        case _:IdFeature => true
+        case _ => false
+      })).asInstanceOf[Level]
+    } else
+      Concept.copyConcept(graphDimension)(Set.empty)(graphDimension.linkedFeatures.filter(e => e._2 match {
+        case _:IdFeature => true
+        case _ => false
+      })).asInstanceOf[Level]
+  }
+
+  def pruneLinkedConcepts(linkedConcepts: Set[(Edge, Concept)]): Set[(Edge, Concept)] =
+    linkedConcepts.filter(e => e._1.name == "partOf")
+
+  /**
+   * Assumes all the dimensions are directly attached to the fact.
+   * @param query is the Fact
+   * @return all the dimensions graph attached to the fact. The detection is done by checking the attached Level
+   *         and then returning the entire branch
+   */
+  def allDimensions(query: Concept): Set[(Edge,Level)] = query.linkedConcepts.filter(c => c._2 match {
+    case _:Level => true
+    case _ => false
+  }).asInstanceOf[Set[(Edge,Level)]]
+
+  /**
+   * Assumes there is only one partOf relationship starting from each level.
+   * @param level that is the lower granularity level of a dimension
+   * @return The higher granularity level of the dimension
+   */
+  def higherGranularityLevel(level: Level): Level =
+    if (!level.linkedConcepts.map(_._1).exists(e => e.name == "partOf")) level
+    else higherGranularityLevel(level.linkedConcepts.filter(e => e._1.name == "partOf").map(_._2).head.asInstanceOf[Level])
+
+}
+
+object TestOps extends App {
+
+  val M = Measure("M")
+  val ID_L11 = IdFeature("ID_L11")
+  val ID_L21 = IdFeature("ID_L21")
+  val ID_L12 = IdFeature("ID_L12")
+  val ID_L22 = IdFeature("ID_L22")
+  val ID_L13 = IdFeature("ID_L13")
+  val ID_L23 = IdFeature("ID_L23")
+
+  val targetGraph =
+    Concept("X")
+      .hasFeature(M)
+      .hasConcept("c")(
+        Concept("C1")
+      )
+      .hasConcept("D1")(
+        Level("L11")
+          .hasFeature(ID_L11)
+          .partOf(
+            Level("L12")
+              .hasFeature(ID_L12)
+              .partOf(
+                Level("L13")
+                  .hasFeature(ID_L13)
+              )
+          )
+      )
+      .hasConcept("D2")(
+        Level("L21")
+          .hasFeature(ID_L21)
+          .partOf(
+            Level("L22")
+              .hasFeature(ID_L22)
+              .partOf(
+                Level("L22")
+                  .hasFeature(ID_L23)
+              )
+          )
+      )
+
+  val query =
+    Concept("X")
+      .hasFeature(M)
+      .hasConcept("c")(
+        Concept("C1")
+      )
+      .hasConcept("D1")(
+        Level("L11")
+          .hasFeature(ID_L11)
+          .partOf(
+            Level("L12")
+              .hasFeature(ID_L12)
+          )
+      )
+      .hasConcept("D2")(
+        Level("L21")
+          .hasFeature(ID_L21)
+          .partOf(
+            Level("L22")
+              .hasFeature(ID_L22)
+          )
+      )
+
+  val queryDimension =
+    Level("L11")
+      .hasFeature(ID_L11)
+      .partOf(
+        Level("L12")
+          .hasFeature(ID_L12)
+      )
+
+  val graphDimension =
+    Level("L21")
+      .hasFeature(ID_L21)
+      .partOf(
+        Level("L22")
+          .hasFeature(ID_L22)
+      )
+
+  val aggregatingFunction = Set(AggregatingFunction("avg"))
+
+
+
+
+
+
+
+}

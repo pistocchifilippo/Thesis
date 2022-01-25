@@ -33,7 +33,7 @@ object Utils {
    * @param query
    * @param scenario
    */
-  def generateAllFiles(concepts: Set[Concept], wrappers: Set[Wrapper], query: Concept, graph: Concept)(scenario: String): Unit = {
+  def generateAllFiles(concepts: Set[Concept], wrappers: Set[Wrapper], query: List[Concept], graph: Concept)(scenario: String): Unit = {
     buildPath(scenario)
     val scenario_path = buildScenarioPath(scenario)
     println("Generating files in directory: " + scenario_path)
@@ -58,8 +58,9 @@ object Utils {
         csvWriter.close()
       }
     })
-    val expandedQuery = ImplicitAggregation.expandAggregationLevels(query)(graph)
-    queryWriter.write(Query.generateQuery(expandedQuery))
+    val it = Query.queryNumIterator()
+    val SPARQL = query.foldRight(""){(q,acc) => acc + Query.generateQuery(q)(it)}
+    queryWriter.write(SPARQL)
     // Closing
     globalGraphWriter.close()
     sourceGraphWriter.close()
@@ -74,6 +75,49 @@ object Utils {
 
   def copyF(from: java.io.File, to: String): Unit =  {
     IO.copy(from,new File(to))
+  }
+
+  def generate(concepts: Set[Concept], wrappers: Set[Wrapper], graph: Concept)(scenario: String): List[Concept] => Unit = {
+    val configuredFunction: List[Concept] => Unit = queries => {
+      buildPath(scenario)
+      val scenario_path = buildScenarioPath(scenario)
+      println("Generating files in directory: " + scenario_path)
+      // Writers
+      val globalGraphWriter = new BufferedWriter(new FileWriter(scenario_path + "global_graph.txt"))
+      val sourceGraphWriter = new BufferedWriter(new FileWriter(scenario_path + "source_graph.txt"))
+      val wrapperWriter = new BufferedWriter(new FileWriter(scenario_path + "wrappers_files.txt"))
+      val mappingWriter = new BufferedWriter(new FileWriter(scenario_path + "mappings.txt"))
+      val queryWriter = new BufferedWriter(new FileWriter(scenario_path + "queries.txt"))
+
+      // Generating global graph files
+      globalGraphWriter.write(concepts.map(_.stringify()).foldRight("")(_ + _))
+      // generating files related to wrappers
+      sourceGraphWriter.write(wrappers.map(_.stringify()).foldRight("")(_ + _))
+      wrappers.foreach(w => {
+        //      Wrapper.GenerateMappingsFile(w,mappingWriter,scenario)
+        Wrapper.GenerateWrapperFile(w,wrapperWriter,scenario_path)
+        // Generating data files for each wrapper
+        if(!new File(scenario_path + w.name +".csv").exists()){
+          val csvWriter = new BufferedWriter(new FileWriter(scenario_path + w.name +".csv"))
+          Wrapper.GenerateCsv(w,csvWriter,scenario_path)
+          csvWriter.close()
+        }
+      })
+      val it = Query.queryNumIterator()
+      val SPARQL = queries.foldRight(""){(q,acc) => acc + Query.generateQuery(q)(it)}
+      queryWriter.write(SPARQL)
+      // Closing
+      globalGraphWriter.close()
+      sourceGraphWriter.close()
+      wrapperWriter.close()
+      Mapping.generateMappingFile(wrappers)(concepts.head)(scenario_path + "global_graph.txt")(mappingWriter)
+      mappingWriter.close()
+      queryWriter.close()
+
+      copyF(new File("app/src/main/resources/configFiles/metamodel.txt"), scenario_path + "metamodel.txt")
+      copyF(new File("app/src/main/resources/configFiles/prefixes.txt"), scenario_path + "prefixes.txt")
+    }
+    configuredFunction
   }
 
 }

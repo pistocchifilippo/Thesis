@@ -32,13 +32,26 @@ class UnexpectedOutputScenario extends Scenario {
       }
   }
 
+  query{
+    Concept("Sales")
+      .hasFeature {
+        REVENUE
+      }
+      .->("location") {
+        Level("Region")
+          .partOf {
+            Level("Country")
+              .hasFeature {
+                COUNTRY
+              }
+          }
+      }
+  }
+
   wrapper{
     Wrapper("W1")
       .hasAttribute {
         Attribute("country") sameAs COUNTRY
-      }
-      .hasAttribute {
-        Attribute("region2") sameAs REGION
       }
       .hasAttribute {
         Attribute("revenue") sameAs REVENUE

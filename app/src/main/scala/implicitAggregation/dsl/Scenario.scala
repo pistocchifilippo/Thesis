@@ -29,8 +29,11 @@ class Scenario extends ScenarioBuilder {
   override def query(concept: Concept): Unit = Q = Some(concept)
 
   override def run(executeImplicitRollUp: Boolean): Unit = {
-    Utils.generateAllFiles(Set(MG),W,makeQuery(),MG)(scenarioName)
+    Utils.generateAllFiles(Set(MG),W,List(makeQuery()),MG)(scenarioName)
     QueryExecution.execute(scenarioName,Utils.SCENARIOS_PATH,executeImplicitRollUp)(makeQuery())(AF)(W)
+//    ImplicitRollUp.executeImplicitRollUp(AF,makeQuery(),MG,scenarioName,Utils.SCENARIOS_PATH)(executeImplicitRollUp)(
+//      Utils.generate(Set(MG),W,MG)(scenarioName)
+//    )(W)
   }
   private def makeQuery(): Concept = if (Q.isEmpty) MG else Q.get
 }
