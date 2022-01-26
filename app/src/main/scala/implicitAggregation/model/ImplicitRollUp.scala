@@ -3,46 +3,46 @@ package implicitAggregation.model
 object ImplicitRollUp {
 
   def executeImplicitRollUp(functions:Set[AggregatingFunction],query: Concept, graph: Concept,scenario:String,basePath:String)(makeImplicitRollUp: Boolean)(wrappers: Set[Wrapper]): String = {
-    if(canAggregate(query) && makeImplicitRollUp){
+    if (canAggregate(query) && makeImplicitRollUp) {
       println("IMPLICIT ROLL-UP: YES")
-      val allDimensionQueries_ = allDimensionQueries(query,graph)
-      val rollUpQueries_ = query :: rollUpQueries(query,allDimensionQueries_)
-      ImplicitRollUpUtils.generateAllFiles(Set(graph),wrappers,rollUpQueries_)(scenario)
-      val CQs = Rewriting.rewrite(scenario,basePath)
+      val allDimensionQueries_ = allDimensionQueries(query, graph)
+      val rollUpQueries_ = query :: rollUpQueries(query, allDimensionQueries_)
+      ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, rollUpQueries_)(scenario)
+      val CQs = Rewriting.rewrite(scenario, basePath)
       CQs.foreach(println)
       val sql = CQs.map(Rewriting.toSQL(_)(Utils.buildScenarioPath(scenario))(wrappers))
       val gbClauses = parseGBClauses(extractGroupByClauses(query))
-      val aggClauses = parseAggregationClauses(extractAggregationClauses(functions,query))
-      val gbSql = sql.map(wrapGroupBy(_,gbClauses,aggClauses))
+      val aggClauses = parseAggregationClauses(extractAggregationClauses(functions, query))
+      val gbSql = sql.map(wrapGroupBy(_, gbClauses, aggClauses))
       gbSql.foreach(println)
-      val unionSql = gbSql.tail.foldRight(gbSql.head)((a,b) => b + "\nUNION\n" + a)
+      val unionSql = gbSql.tail.foldRight(gbSql.head)((a, b) => b + "\nUNION\n" + a)
       println()
       println(unionSql)
-//      Rewriting.executeSql(CQs.last,unionSql)
+      //      Rewriting.executeSql(CQs.last,unionSql)
       null
     } else {
       println("IMPLICIT ROLL-UP: NO")
-      ImplicitRollUpUtils.generateAllFiles(Set(graph),wrappers,List(query))(scenario)
-      val CQ = Rewriting.rewrite(scenario,basePath).head
+      ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, List(query))(scenario)
+      val CQ = Rewriting.rewrite(scenario, basePath).head
       val sql = Rewriting.toSQL(CQ)(Utils.buildScenarioPath(scenario))(wrappers)
-      Rewriting.executeSql(CQ,sql)
+      Rewriting.executeSql(CQ, sql)
       null
     }
   }
 
   def canAggregate(query: Concept): Boolean = extractGroupByClauses(query).nonEmpty && Graph.allMeasures(query).nonEmpty
-  //  def canAggregate(query: Concept): Boolean = extractGroupByClauses(query).nonEmpty && Graph.allMeasures(query).nonEmpty && Graph.allConcept(query).map {
-  //    case l: Level =>
-  //      !l.linkedFeatures.map(_._2).exists(x => x match {
-  //        case _: Measure => false
-  //        case _: IdFeature => false
-  //        case _ => true
-  //      })
-  //    case c => !c.linkedFeatures.map(_._2).exists(x => x match {
-  //      case _: Measure => false
-  //      case _ => true
-  //    })
-  //  }.foldRight(true)(_ && _)
+//  def canAggregate(query: Concept): Boolean = extractGroupByClauses(query).nonEmpty && Graph.allMeasures(query).nonEmpty && Graph.allConcept(query).map {
+//    case l: Level =>
+//      !l.linkedFeatures.map(_._2).exists(x => x match {
+//        case _: Measure => false
+//        case _: IdFeature => false
+//        case _ => true
+//      })
+//    case c => !c.linkedFeatures.map(_._2).exists(x => x match {
+//      case _: Measure => false
+//      case _ => true
+//    })
+//  }.foldRight(true)(_ && _)
 
   /**
    * Assumes there is just one [[IdFeature]] for each level and that the last queried level contains and [[IdFeature]].
@@ -129,7 +129,7 @@ object ImplicitRollUp {
     val allDimensionQueries = queryDimensions.map(d => {
       val queryDimension = d._2
       val graphDimension = extractDimension(queryDimension, graph)
-      val prunedGraphDimension = pruneGraphDimension(queryDimension,graphDimension.get) //***
+      val prunedGraphDimension = pruneGraphDimension(queryDimension,graphDimension.get)
       val queries = generateDimensionQueries(prunedGraphDimension)
       (d._1,queries)
     })
@@ -154,6 +154,7 @@ object ImplicitRollUp {
     val cross = crossJoin(dimensionQueries)
 
     val rollUpQueries = cross.map(q => Concept.copyConcept(detachedQuery)(q.map(e => (dimensions.find(x => x._2.name == e.name).get._1,e.asInstanceOf[Concept])).toSet)(detachedQuery.linkedFeatures))
+
     rollUpQueries
   }
 
@@ -164,8 +165,9 @@ object ImplicitRollUp {
    * @return
    */
   def pruneGraphDimension(queryDimension: Level, graphDimension: Level): Level = {
-    val prunedLinkedConceptsQ = pruneLinkedConcepts(queryDimension.linkedConcepts) // just "partOf" relationship in Q
-    val prunedLinkedConceptsG = pruneLinkedConcepts(graphDimension.linkedConcepts) // just "partOf" relationship in G
+    val prunedLinkedConceptsQ = pruneLinkedConcepts(queryDimension.linkedConcepts)
+    val prunedLinkedConceptsG = pruneLinkedConcepts(graphDimension.linkedConcepts)
+
     val nextLevelQ = prunedLinkedConceptsQ.map(_._2).headOption.asInstanceOf[Option[Level]]
     val nextLevelG = prunedLinkedConceptsG.map(_._2).headOption.asInstanceOf[Option[Level]]
 
@@ -207,41 +209,3 @@ object ImplicitRollUp {
   def wrapGroupBy(sql: String, gbClauses: String, aggClauses: String): String = s"SELECT $gbClauses,$aggClauses\nFROM( $sql )\nGROUP BY $gbClauses"
 
 }
-
-object TestOps extends App {
-  val CITY = IdFeature("City_f")
-  val REGION = IdFeature("Region_f")
-  val COUNTRY = IdFeature("Country_f")
-  val REVENUE = Measure("Revenue_f")
-
-  val mg =
-    Level("City")
-      .hasFeature(CITY)
-      .partOf(
-        Level("Region")
-          .hasFeature(REGION)
-          .partOf(
-            Level("Country")
-              .hasFeature(COUNTRY)
-          )
-      )
-
-
-  val q =
-   Level("City")
-     .partOf(
-       Level("Region")
-         .partOf(
-           Level("Country")
-             .hasFeature(COUNTRY)
-         )
-     )
-
-
-  println(
-    ImplicitRollUp.pruneGraphDimension(q.asInstanceOf[Level],mg.asInstanceOf[Level])
-  )
-
-
-}
-

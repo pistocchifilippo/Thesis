@@ -39,6 +39,7 @@ trait Concept extends GraphComponent {
       linkedConcepts.map(e => s"s:${name} s:${e._1.name} s:${e._2.name}\n").foldRight("")(_ + _) +
       linkedFeatures.map(e => e._2.stringify()).foldRight("")(_ + _) +
       linkedConcepts.map(e => e._2.stringify()).foldRight("")(_ + _)
+
 }
 
 trait Graph extends Set[Concept] {
@@ -49,12 +50,14 @@ trait BaseConcept extends Concept {
   override def hasFeature(feature: Feature): Concept = this match {
     case GenericConcept(name,linkedConcepts,linkedFeatures) => GenericConcept(name,linkedConcepts,linkedFeatures + Tuple2(Edge("hasFeature"),feature))
     case Level(name,linkedConcepts,linkedFeatures) => Level(name,linkedConcepts,linkedFeatures + Tuple2(Edge("hasFeature"),feature))
+    case Fact(name,linkedConcepts,linkedFeatures) => Fact(name,linkedConcepts,linkedFeatures + Tuple2(Edge("hasFeature"),feature))
   }
 
 
   override def hasConcept(label: String)(concept: Concept): Concept = this match {
     case GenericConcept(name,linkedConcepts,linkedFeatures) => GenericConcept(name,linkedConcepts + Tuple2(Edge(label),concept),linkedFeatures)
     case Level(name,linkedConcepts,linkedFeatures) => Level(name,linkedConcepts + Tuple2(Edge(label),concept),linkedFeatures)
+    case Fact(name,linkedConcepts,linkedFeatures) => Fact(name,linkedConcepts + Tuple2(Edge(label),concept),linkedFeatures)
   }
 
   override def ->(feature: Feature): Concept = hasFeature(feature)
@@ -162,6 +165,7 @@ object Concept {
   def copyConcept(concept: Concept)(linkedConcepts: Set[(Edge,Concept)])(linkedFeatures: Set[(Edge,Feature)]): Concept = concept match {
     case GenericConcept(name,_,_) => GenericConcept(name,linkedConcepts,linkedFeatures)
     case Level(name,_,_) => Level(name,linkedConcepts,linkedFeatures)
+    case Fact(name,_,_) => Fact(name,linkedConcepts,linkedFeatures)
   }
 
 }
