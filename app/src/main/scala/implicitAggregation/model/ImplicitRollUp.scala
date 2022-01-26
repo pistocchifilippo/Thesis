@@ -18,7 +18,7 @@ object ImplicitRollUp {
       val unionSql = gbSql.tail.foldRight(gbSql.head)((a, b) => b + "\nUNION\n" + a)
       println()
       println(unionSql)
-      //      Rewriting.executeSql(CQs.last,unionSql)
+//      Rewriting.executeSql(CQs.last,unionSql)
       null
     } else {
       println("IMPLICIT ROLL-UP: NO")
