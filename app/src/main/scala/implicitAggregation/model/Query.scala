@@ -1,13 +1,14 @@
 package implicitAggregation.model
 
-import implicitAggregation.model.Graph.copyAllGraph
-
 import java.util.Scanner
 
 object Query {
 
   def generateQuery(graph: Concept): String = {
     s"#q1\nSELECT ${select(graph)}\nWHERE {\n  ${values(graph)}\n  ${clean(graph.stringify()).replace("\n"," .\n  ")}\n}\n#"
+  }
+  def generateQueries(graph: Concept)(iterator: Iterator[Int]): String = {
+    s"q${iterator.next()}\nSELECT ${select(graph)}\nWHERE {\n  ${values(graph)}\n  ${clean(graph.stringify()).replace("\n"," .\n  ")}\n}\n#"
   }
   def allFeature(graph: Concept): Set[Feature] =
     graph.linkedFeatures.map(_._2) ++ {if (graph.linkedConcepts.nonEmpty) graph.linkedConcepts.flatMap(c => allFeature(c._2)) else Set.empty}
