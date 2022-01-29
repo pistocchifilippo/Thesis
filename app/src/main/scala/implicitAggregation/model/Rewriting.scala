@@ -77,6 +77,11 @@ object Rewriting {
 
   def executeSql(CQs: java.util.Set[ConjunctiveQuery], sql: String): Unit = NextiaQR.executeSQL(CQs,sql)
 
+  def flatten(CQs: List[java.util.Set[ConjunctiveQuery]]): java.util.Set[ConjunctiveQuery] = {
+    import collection.JavaConverters._
+    CQs.flatMap(s => s.asScala).toSet.asJava
+  }
+
   private def makeNameMappings(wrappers: Set[implicitAggregation.model.Wrapper]): util.Map[String,String] = {
     val map: util.Map[String,String] = new util.HashMap()
     wrappers.flatMap(w => w.attributes).filter(a => a.sameAs.nonEmpty).map(a => (a.name, a.sameAs.get.name)).foreach(a => map.put(a._1,a._2))

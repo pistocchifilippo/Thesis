@@ -18,7 +18,8 @@ object ImplicitRollUp {
       val unionSql = gbSql.tail.foldRight(gbSql.head)((a, b) => b + "\nUNION\n" + a)
       println()
       println(unionSql)
-//      Rewriting.executeSql(CQs.last,unionSql)
+      val groupByUnionSql = wrapGroupBy(unionSql,gbClauses,aggClauses)
+      Rewriting.executeSql(Rewriting.flatten(CQs),groupByUnionSql)
       null
     } else {
       println("IMPLICIT ROLL-UP: NO")
@@ -70,7 +71,12 @@ object ImplicitRollUp {
    * @param levels of aggregation
    * @return A [[String]] containing the GroupBy clauses in SQL syntax
    */
-  def parseGBClauses(levels: Set[Level]): String = levels.map(_.name).mkString(",")
+  def parseGBClauses(levels: Set[Level]): String =
+    levels.map(_.linkedFeatures.filter(f => f._2 match {
+      case _:IdFeature => true
+      case _ => false
+    }).head._2.name).mkString(",")
+
 
   /**
    *
