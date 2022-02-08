@@ -64,6 +64,9 @@ class GeographicProductCiRePrCat extends Scenario {
       .hasAttribute {
         Attribute("city1") sameAs CITY
       }
+      .hasAttribute {
+        Attribute("category1") sameAs CATEGORY
+      }
   )
 
   wrapper(
@@ -72,7 +75,10 @@ class GeographicProductCiRePrCat extends Scenario {
         Attribute("revenue2") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("region1") sameAs REGION
+        Attribute("region2") sameAs REGION
+      }
+      .hasAttribute {
+        Attribute("product2") sameAs PRODUCT
       }
   )
 
@@ -82,7 +88,10 @@ class GeographicProductCiRePrCat extends Scenario {
         Attribute("revenue3") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("product1") sameAs PRODUCT
+        Attribute("region3") sameAs REGION
+      }
+      .hasAttribute {
+        Attribute("category3") sameAs CATEGORY
       }
   )
 
@@ -92,27 +101,43 @@ class GeographicProductCiRePrCat extends Scenario {
         Attribute("revenue4") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("category1") sameAs CATEGORY
+        Attribute("city4") sameAs CITY
+      }
+      .hasAttribute {
+        Attribute("product4") sameAs PRODUCT
       }
   )
 
   wrapper(
-    Wrapper("LUT1")
+    Wrapper("W7")
       .hasAttribute {
-        Attribute("city2") sameAs CITY
+        Attribute("revenue7") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("region2") sameAs REGION
+        Attribute("city7") sameAs CITY
+      }
+      .hasAttribute {
+        Attribute("product7") sameAs PRODUCT
       }
   )
 
   wrapper(
-    Wrapper("LUT2")
+    Wrapper("LUT5")
       .hasAttribute {
-        Attribute("product2") sameAs PRODUCT
+        Attribute("city5") sameAs CITY
       }
       .hasAttribute {
-        Attribute("category2") sameAs CATEGORY
+        Attribute("region5") sameAs REGION
+      }
+  )
+
+  wrapper(
+    Wrapper("LUT6")
+      .hasAttribute {
+        Attribute("product6") sameAs PRODUCT
+      }
+      .hasAttribute {
+        Attribute("category6") sameAs CATEGORY
       }
   )
 

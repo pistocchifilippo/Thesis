@@ -72,7 +72,7 @@ class GeographicCiReCoCo extends Scenario {
         Attribute("revenue2") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("region1") sameAs REGION
+        Attribute("region2") sameAs REGION
       }
   )
 
@@ -82,7 +82,7 @@ class GeographicCiReCoCo extends Scenario {
         Attribute("revenue3") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("country1") sameAs COUNTRY
+        Attribute("country3") sameAs COUNTRY
       }
   )
 
@@ -92,37 +92,37 @@ class GeographicCiReCoCo extends Scenario {
         Attribute("revenue4") sameAs REVENUE
       }
       .hasAttribute {
-        Attribute("continent1") sameAs CONTINENT
+        Attribute("continent4") sameAs CONTINENT
       }
   )
 
   wrapper(
-    Wrapper("LUT1")
+    Wrapper("LUT5")
       .hasAttribute {
-        Attribute("city2") sameAs CITY
+        Attribute("city5") sameAs CITY
       }
       .hasAttribute {
-        Attribute("region2") sameAs REGION
-      }
-  )
-
-  wrapper(
-    Wrapper("LUT2")
-      .hasAttribute {
-        Attribute("region3") sameAs REGION
-      }
-      .hasAttribute {
-        Attribute("country2") sameAs COUNTRY
+        Attribute("region5") sameAs REGION
       }
   )
 
   wrapper(
-    Wrapper("LUT3")
+    Wrapper("LUT6")
       .hasAttribute {
-        Attribute("country3") sameAs COUNTRY
+        Attribute("region6") sameAs REGION
       }
       .hasAttribute {
-        Attribute("continent2") sameAs CONTINENT
+        Attribute("country6") sameAs COUNTRY
+      }
+  )
+
+  wrapper(
+    Wrapper("LUT7")
+      .hasAttribute {
+        Attribute("country7") sameAs COUNTRY
+      }
+      .hasAttribute {
+        Attribute("continent7") sameAs CONTINENT
       }
   )
 

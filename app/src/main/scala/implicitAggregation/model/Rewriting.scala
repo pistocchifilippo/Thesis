@@ -41,7 +41,7 @@ object Rewriting {
     } else {
       val minimal = queries.remove(0)
       import collection.JavaConverters._
-      queries.asScala.sortWith((t1,t2) => t1._2.length < t2._2.length).map(query => {
+      queries.asScala.sortWith((t1,t2) => t1._2.length < t2._2.length).sortWith((t1,t2) => t1._2.length < t2._2.length).map(query => { //.sortWith((t1,t2) => t1._2.length < t2._2.length)
         println()
         println("QUERY: " + query._2)
         println("MINIM: " + minimal._2)

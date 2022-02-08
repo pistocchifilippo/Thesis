@@ -9,7 +9,7 @@ object ImplicitRollUp {
       val rollUpQueries_ = query :: rollUpQueries(query, allDimensionQueries_)
       ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, rollUpQueries_)(scenario)
       val CQs = Rewriting.rewrite(scenario, basePath)
-      CQs.foreach(println)
+//      CQs.foreach(println)
       val sql = CQs.map(Rewriting.toSQL(_)(Utils.buildScenarioPath(scenario))(wrappers))
       val gbClauses = parseGBClauses(extractGroupByClauses(query))
       val aggClauses = parseAggregationClauses(extractAggregationClauses(functions, query))
