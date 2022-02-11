@@ -24,10 +24,10 @@ object QueryExecution {
 //      println("CQs" + CQs)
 
       // To SQL
-      val SQL = QueryManager.toSql(CQs,scenarioPath,makeImplicitAggregation)(wrappers)
+//      val SQL = QueryManager.toSql(CQs,scenarioPath,makeImplicitAggregation)(wrappers)
 
       //3 -- Convert SQL to DATA
-      NextiaQR.executeSQL(CQs, SQL)
+//      NextiaQR.executeSQL(CQs, SQL)
     })
   }
 

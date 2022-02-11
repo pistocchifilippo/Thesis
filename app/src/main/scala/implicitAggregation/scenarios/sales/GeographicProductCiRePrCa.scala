@@ -3,7 +3,7 @@ package implicitAggregation.scenarios.sales
 import implicitAggregation.dsl.Scenario
 import implicitAggregation.model.{AggregatingFunction, Attribute, Concept, IdFeature, Level, Measure, Wrapper}
 
-class GeographicProductCiRePrCat extends Scenario {
+class GeographicProductCiRePrCa extends Scenario {
 
   scenario{
     "GeographicProductCiRePrCat"
@@ -147,7 +147,6 @@ class GeographicProductCiRePrCat extends Scenario {
 
 }
 
-object GeographicProductCiRePrCat extends App {
-  new GeographicProductCiRePrCat().run(true)
+object GeographicProductCiRePrCa extends App {
+  new GeographicProductCiRePrCa().run(true)
 }
-

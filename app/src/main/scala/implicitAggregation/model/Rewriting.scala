@@ -1,20 +1,17 @@
 package implicitAggregation.model
 
-import com.google.common.collect.{Maps, Sets}
-import edu.upc.essi.dtim.nextiaqr.models.querying.wrapper_impl.CSV_Wrapper
-import edu.upc.essi.dtim.nextiaqr.models.querying.{ConjunctiveQuery, Wrapper}
+import edu.upc.essi.dtim.nextiaqr.models.querying.{ConjunctiveQuery, RewritingResult}
 import edu.upc.essi.dtim.{NextiaQR, TestUtils}
 import org.apache.commons.io.FileUtils
 import org.apache.jena.query.ReadWrite
 import org.apache.jena.tdb.TDBFactory
 
 import java.io.File
-import java.nio.file.Files
 import java.util
 
 object Rewriting {
 
-  def rewrite(scenario: String, basePath: String): List[java.util.Set[ConjunctiveQuery]] = {
+  def rewrite(scenario: String, basePath: String): List[RewritingResult] = {
     val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario
     val scenarioPath = basePath + scenario + "/"
     val jenaPath = "TestScenarioRunnerDataset"
@@ -30,56 +27,69 @@ object Rewriting {
     val T = TDBFactory.createDataset(jenaPath)
     T.begin(ReadWrite.READ)
 
-    val CQs = if (queries.size() == 1) {
-      val query = queries.remove(0)
-      println()
-      println("QUERY: " + query._2)
-      println("MINIM: " + query._2)
-      val cq = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T,query._2)
-      println(cq)
-      List(cq)
-    } else {
-      val minimal = queries.remove(0)
-      import collection.JavaConverters._
-      queries.asScala.sortWith((t1,t2) => t1._2.length < t2._2.length).sortWith((t1,t2) => t1._2.length < t2._2.length).map(query => { //.sortWith((t1,t2) => t1._2.length < t2._2.length)
+    val CQs = {
+      if (queries.size() == 1) {
+        val query = queries.remove(0)
         println()
         println("QUERY: " + query._2)
-        println("MINIM: " + minimal._2)
-        val cq = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T, minimal._2)
-        println(cq)
-        cq
-      }).toList
-    }
+        println("MINIM: " + query._2)
+        val cq = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T, query._2)
+        println(cq.getCQs)
+        List(cq)
+      } else {
+        val minimal = queries.remove(0)
+        import collection.JavaConverters._
+        queries.asScala.map(query => { //.sortWith((t1,t2) => t1._2.length < t2._2.length)
+          println()
+          println("QUERY: " + query._2)
+          println("MINIM: " + minimal._2)
+          val cq = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T, minimal._2)
+          println(cq.getCQs)
+          cq
+        }).toList
+      }
+    }.filter(!_.getCQs.isEmpty)
 
 //    CQs.foreach(println)
     CQs
   }
 
-  def toSQL(CQs: java.util.Set[ConjunctiveQuery])(scenarioPath: String)(wrappers: Set[implicitAggregation.model.Wrapper]): String = {
-    val iriToCSVPath:util.Map[String,String] = Maps.newHashMap
-    Files.readAllLines(new File(scenarioPath + "wrappers_files.txt").toPath).stream.forEach((s: String) => {
-      iriToCSVPath.put(s.split(",")(0), s.split(",")(1))
-    })
-    CQs.forEach((cq: ConjunctiveQuery) => {
-      val CSV_Wrappers: util.Set[Wrapper] = Sets.newHashSet
-      cq.getWrappers.forEach((w: Wrapper) => {
-        val csv = new CSV_Wrapper(w.getWrapper)
-        csv.setPath(iriToCSVPath.get(w.getWrapper))
-        csv.setHeaderInFirstRow(true)
-        csv.setColumnDelimiter(",")
-        csv.setRowDelimiter("\n")
-        CSV_Wrappers.add(csv)
-      })
-      cq.setWrappers(CSV_Wrappers)
-    })
+  def toSQL(CQs: RewritingResult)(scenarioPath: String)(wrappers: Set[implicitAggregation.model.Wrapper]): String = {
     NextiaQR.toSQL(CQs, makeNameMappings(wrappers))
   }
 
   def executeSql(CQs: java.util.Set[ConjunctiveQuery], sql: String): Unit = NextiaQR.executeSQL(CQs,sql)
 
-  def flatten(CQs: List[java.util.Set[ConjunctiveQuery]]): java.util.Set[ConjunctiveQuery] = {
+  def flatten(CQs: List[RewritingResult]): java.util.Set[ConjunctiveQuery] = {
     import collection.JavaConverters._
-    CQs.flatMap(s => s.asScala).toSet.asJava
+    CQs.flatMap(s => s.getCQs.asScala).toSet.asJava
+  }
+
+  def pruneDoubleCQs(CQs: List[RewritingResult])(cachedCQs: Set[ConjunctiveQuery]): List[RewritingResult] = {
+    import collection.JavaConverters._
+    CQs match {
+      case h :: t => {
+        val newCached = cachedCQs ++ h.getCQs.asScala
+        h.setCQs(h.getCQs.asScala.filter(e => !cachedCQs.contains(e)).asJava)
+        h :: pruneDoubleCQs(t)(newCached)
+      }
+      case Nil => List.empty
+    }
+  }
+
+  //jc.getLeft_attribute.contains("_lut_") || jc.getRight_attribute.contains("_lut_")
+  def filterWrapperToWrapperJoin(CQs: List[RewritingResult]): List[RewritingResult] = {
+    import collection.JavaConverters._
+    CQs.map(
+      rew => {
+        rew.setCQs(
+          rew.getCQs.asScala.filter(cq =>
+            cq.getJoinConditions.asScala.foldRight(true)((jc,state) => {jc.getLeft_attribute.contains("_lut_") || jc.getRight_attribute.contains("_lut_")} && state)
+          ).asJava
+        )
+        rew
+      }
+    ).filter(rew => !rew.getCQs.isEmpty)
   }
 
   private def makeNameMappings(wrappers: Set[implicitAggregation.model.Wrapper]): util.Map[String,String] = {

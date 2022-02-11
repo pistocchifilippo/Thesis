@@ -1,7 +1,7 @@
 package implicitAggregation.scenarios.sales
 
 import implicitAggregation.dsl.Scenario
-import implicitAggregation.model.{Attribute, Concept, IdFeature, Level, Measure, Wrapper}
+import implicitAggregation.model.{AggregatingFunction, Attribute, Concept, IdFeature, Level, Measure, Wrapper}
 
 class GeographicCiRe extends Scenario {
 
@@ -59,13 +59,30 @@ class GeographicCiRe extends Scenario {
   )
 
   wrapper(
+    Wrapper("W3")
+      .hasAttribute {
+        Attribute("revenue3") sameAs REVENUE
+      }
+      .hasAttribute {
+        Attribute("city3") sameAs CITY
+      }
+      .hasAttribute {
+        Attribute("region3") sameAs REGION
+      }
+  )
+
+  wrapper(
     Wrapper("LUT1")
       .hasAttribute {
-        Attribute("city2") sameAs CITY
+        Attribute("city_lut_2") sameAs CITY
       }
       .hasAttribute {
-        Attribute("region2") sameAs REGION
+        Attribute("region_lut_2") sameAs REGION
       }
+  )
+
+  aggregation(
+    AggregatingFunction("avg") aggregates REVENUE
   )
 
 }
