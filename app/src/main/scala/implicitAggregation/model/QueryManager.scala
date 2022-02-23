@@ -31,9 +31,9 @@ object QueryManager {
 
   def toSql(CQs: RewritingResult, scenarioPath: String, makeImplicitAggregation: Boolean)(wrappers: Set[implicitAggregation.model.Wrapper]): String = {
     val SQL = if(makeImplicitAggregation) {
-      NextiaQR.toSQL(CQs, makeNameMappings(wrappers))
+      NextiaQR.toSQLAsRel(CQs, makeNameMappings(wrappers))
     } else {
-      NextiaQR.toSQL(CQs, null)
+      NextiaQR.toSQLAsRel(CQs, null)
     }
     SQL
   }

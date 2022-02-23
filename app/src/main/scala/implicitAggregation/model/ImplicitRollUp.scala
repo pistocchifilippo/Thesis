@@ -2,19 +2,22 @@ package implicitAggregation.model
 
 object ImplicitRollUp {
 
-  def executeImplicitRollUp(functions:Set[AggregatingFunction],query: Concept, graph: Concept,scenario:String,basePath:String)(makeImplicitRollUp: Boolean)(wrappers: Set[Wrapper]): String = {
+  def executeImplicitRollUp(functions:Set[AggregatingFunction],query: Concept, graph: Concept,scenario:String,basePath:String)(makeImplicitRollUp: Boolean)(wrappers: Set[Wrapper]): (Long,Long,Long) = {
     if (canAggregate(query) && makeImplicitRollUp) {
+      val timeAlgStart = System.currentTimeMillis()
+
       println("IMPLICIT ROLL-UP: YES")
       val allDimensionQueries_ = allDimensionQueries(query, graph)
       val rollUpQueries_ = query :: rollUpQueries(query, allDimensionQueries_)
       ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, rollUpQueries_)(scenario)
-      var CQs = Rewriting.rewrite(scenario, basePath)
+      wrappers.foreach(println)
+      val timeRewritingStart = System.currentTimeMillis()
+      val CQs = Rewriting.rewrite(scenario, basePath) //*** v1
+      val timeRewriting = System.currentTimeMillis() - timeRewritingStart
+
       val prunedCQs = Rewriting.pruneDoubleCQs(CQs)(Set.empty)
-      println()
-      prunedCQs.foreach(q => println(q.getCQs))
-      println()
       val CQs2 = Rewriting.filterWrapperToWrapperJoin(prunedCQs)
-      CQs2.foreach(x => x.getCQs.forEach(println))
+      println()
       CQs2.foreach(x => println(x.getCQs))
       println()
       val sql = CQs2.map(Rewriting.toSQL(_)(Utils.buildScenarioPath(scenario))(wrappers))
@@ -31,16 +34,20 @@ object ImplicitRollUp {
       val groupByUnionSql = wrapGroupBy(unionSql,gbClauses,aggClauses)
       println()
       println(groupByUnionSql)
-      Rewriting.executeSql(Rewriting.flatten(CQs2),groupByUnionSql)
 
-      null
+      val timeExecutingStart = System.currentTimeMillis()
+      Rewriting.executeSql(Rewriting.flatten(CQs2),groupByUnionSql)(Utils.buildScenarioPath(scenario))(wrappers) //*** v2
+      val timeExecuting = System.currentTimeMillis() - timeExecutingStart
+      val timeAlg = System.currentTimeMillis() - timeAlgStart - timeRewriting - timeExecuting
+
+      (timeRewriting,timeExecuting,timeAlg)
     } else {
       println("IMPLICIT ROLL-UP: NO")
       ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, List(query))(scenario)
       val CQ = Rewriting.rewrite(scenario, basePath).head
       val sql = Rewriting.toSQL(CQ)(Utils.buildScenarioPath(scenario))(wrappers)
-      Rewriting.executeSql(CQ.getCQs, sql)
-      null
+      Rewriting.executeSql(CQ.getCQs, sql)(Utils.buildScenarioPath(scenario))(wrappers)
+      (1,1,1)
     }
   }
 

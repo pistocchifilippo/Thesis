@@ -1,21 +1,31 @@
 package implicitAggregation.model
 
-import edu.upc.essi.dtim.nextiaqr.models.querying.{ConjunctiveQuery, RewritingResult}
+import com.google.common.collect.Maps
+import edu.upc.essi.dtim.nextiaqr.models.querying.wrapper_impl.CSV_Wrapper
+import edu.upc.essi.dtim.nextiaqr.models.querying.{ConjunctiveQuery, RewritingResult, Wrapper}
 import edu.upc.essi.dtim.{NextiaQR, TestUtils}
 import org.apache.commons.io.FileUtils
 import org.apache.jena.query.ReadWrite
 import org.apache.jena.tdb.TDBFactory
 
 import java.io.File
+import java.nio.file.Files
 import java.util
+import java.util.Map
 
 object Rewriting {
 
   def rewrite(scenario: String, basePath: String): List[RewritingResult] = {
-    val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario
-    val scenarioPath = basePath + scenario + "/"
     val jenaPath = "TestScenarioRunnerDataset"
     FileUtils.deleteDirectory(new File(jenaPath))
+
+    val baseURI = "http://www.essi.upc.edu/~snadal/" + scenario
+    val scenarioPath = basePath + scenario + "/"
+//    val bufferedSource = Source.fromFile(scenarioPath + "source_graph.txt")
+//    for (line <- bufferedSource.getLines) {
+//      println(line)
+//    }
+//    bufferedSource.close
 
     val prefixes: util.Map[String, String] = TestUtils.populatePrefixes(scenarioPath + "prefixes.txt")
     TestUtils.populateTriples(jenaPath, baseURI, scenarioPath + "metamodel.txt", prefixes)
@@ -43,22 +53,60 @@ object Rewriting {
           println()
           println("QUERY: " + query._2)
           println("MINIM: " + minimal._2)
+          val time = System.currentTimeMillis()
           val cq = NextiaQR.rewriteToUnionOfConjunctiveQueries(query._2, T, minimal._2)
+          val totalTime = System.currentTimeMillis() - time
           println(cq.getCQs)
+          println(totalTime)
           cq
         }).toList
       }
     }.filter(!_.getCQs.isEmpty)
-
-//    CQs.foreach(println)
+    T.end()
+    T.close()
+    FileUtils.deleteDirectory(new File(jenaPath))
     CQs
   }
 
   def toSQL(CQs: RewritingResult)(scenarioPath: String)(wrappers: Set[implicitAggregation.model.Wrapper]): String = {
-    NextiaQR.toSQL(CQs, makeNameMappings(wrappers))
+//    val iriToCSVPath: Map[String, String] = Maps.newHashMap
+//    Files.readAllLines(new File(scenarioPath + "wrappers_files.txt").toPath).stream.forEach((s: String) => {
+//      iriToCSVPath.put(s.split(",")(0), s.split(",")(1))
+//    })
+//    CQs.getCQs.forEach((cq: ConjunctiveQuery) => {
+//      val CSV_Wrappers: util.Set[CSV_Wrapper] = new util.HashSet[CSV_Wrapper]()
+//      cq.getWrappers.forEach((w: Wrapper) => {
+//        val csv: CSV_Wrapper = new CSV_Wrapper(w.getWrapper)
+//        csv.setPath(iriToCSVPath.get(w.getWrapper))
+//        csv.setHeaderInFirstRow(true)
+//        csv.setColumnDelimiter(",")
+//        csv.setRowDelimiter("\n")
+//        CSV_Wrappers.add(csv)
+//      })
+//      cq.setWrappers(CSV_Wrappers.asInstanceOf[util.Set[Wrapper]])
+//    })
+    NextiaQR.toSQLAsRel(CQs, makeNameMappings(wrappers))
   }
 
-  def executeSql(CQs: java.util.Set[ConjunctiveQuery], sql: String): Unit = NextiaQR.executeSQL(CQs,sql)
+  def executeSql(CQs: java.util.Set[ConjunctiveQuery], sql: String)(scenarioPath: String)(wrappers: Set[implicitAggregation.model.Wrapper]): Unit = {
+    val iriToCSVPath: Map[String, String] = Maps.newHashMap
+    Files.readAllLines(new File(scenarioPath + "wrappers_files.txt").toPath).stream.forEach((s: String) => {
+      iriToCSVPath.put(s.split(",")(0), s.split(",")(1))
+    })
+    CQs.forEach((cq: ConjunctiveQuery) => {
+      val CSV_Wrappers: util.Set[CSV_Wrapper] = new util.HashSet[CSV_Wrapper]()
+      cq.getWrappers.forEach((w: Wrapper) => {
+        val csv: CSV_Wrapper = new CSV_Wrapper(w.getWrapper)
+        csv.setPath(iriToCSVPath.get(w.getWrapper))
+        csv.setHeaderInFirstRow(true)
+        csv.setColumnDelimiter(",")
+        csv.setRowDelimiter("\n")
+        CSV_Wrappers.add(csv)
+      })
+      cq.setWrappers(CSV_Wrappers.asInstanceOf[util.Set[Wrapper]])
+    })
+    NextiaQR.executeSQL(CQs, sql)
+  }
 
   def flatten(CQs: List[RewritingResult]): java.util.Set[ConjunctiveQuery] = {
     import collection.JavaConverters._
@@ -95,6 +143,7 @@ object Rewriting {
   private def makeNameMappings(wrappers: Set[implicitAggregation.model.Wrapper]): util.Map[String,String] = {
     val map: util.Map[String,String] = new util.HashMap()
     wrappers.flatMap(w => w.attributes).filter(a => a.sameAs.nonEmpty).map(a => (a.name, a.sameAs.get.name)).foreach(a => map.put(a._1,a._2))
+    println(map)
     map
   }
 

@@ -99,30 +99,30 @@ class GeographicCiReCoCo extends Scenario {
   wrapper(
     Wrapper("LUT5")
       .hasAttribute {
-        Attribute("city5") sameAs CITY
+        Attribute("city_lut_5") sameAs CITY
       }
       .hasAttribute {
-        Attribute("region5") sameAs REGION
+        Attribute("region_lut_5") sameAs REGION
       }
   )
 
   wrapper(
     Wrapper("LUT6")
       .hasAttribute {
-        Attribute("region6") sameAs REGION
+        Attribute("region_lut_6") sameAs REGION
       }
       .hasAttribute {
-        Attribute("country6") sameAs COUNTRY
+        Attribute("country_lut_6") sameAs COUNTRY
       }
   )
 
   wrapper(
     Wrapper("LUT7")
       .hasAttribute {
-        Attribute("country7") sameAs COUNTRY
+        Attribute("country_lut_7") sameAs COUNTRY
       }
       .hasAttribute {
-        Attribute("continent7") sameAs CONTINENT
+        Attribute("continent_lut_7") sameAs CONTINENT
       }
   )
 

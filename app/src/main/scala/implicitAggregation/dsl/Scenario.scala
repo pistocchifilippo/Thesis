@@ -12,11 +12,11 @@ trait ScenarioBuilder {
 }
 
 class Scenario extends ScenarioBuilder {
-  private var scenarioName: String = null
-  private var MG: Concept = null
-  private var W: Set[Wrapper] = Set.empty
-  private var AF: Set[AggregatingFunction] = Set.empty
-  private var Q: Option[Concept] = None
+  protected var scenarioName: String = null
+  protected var MG: Concept = null
+  protected var W: Set[Wrapper] = Set.empty
+  protected var AF: Set[AggregatingFunction] = Set.empty
+  protected var Q: Option[Concept] = None
 
   override def scenario(scenario: String): Unit = scenarioName = scenario
 
@@ -33,5 +33,5 @@ class Scenario extends ScenarioBuilder {
 //    QueryExecution.execute(scenarioName,Utils.SCENARIOS_PATH,executeImplicitRollUp)(makeQuery())(AF)(W)
     ImplicitRollUp.executeImplicitRollUp(AF,makeQuery(),MG,scenarioName,Utils.SCENARIOS_PATH)(executeImplicitRollUp)(W)
   }
-  private def makeQuery(): Concept = if (Q.isEmpty) MG else Q.get
+  protected def makeQuery(): Concept = if (Q.isEmpty) MG else Q.get
 }

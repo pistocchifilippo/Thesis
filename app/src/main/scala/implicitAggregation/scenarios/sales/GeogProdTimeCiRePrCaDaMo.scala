@@ -168,7 +168,7 @@ class GeogProdTimeCiRePrCaDaMo extends Scenario {
   )
 
   aggregation(
-    AggregatingFunction("avg") aggregates REVENUE
+    AggregatingFunction("sum") aggregates REVENUE
   )
 
 }

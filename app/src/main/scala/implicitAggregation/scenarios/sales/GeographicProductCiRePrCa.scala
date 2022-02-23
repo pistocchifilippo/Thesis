@@ -124,20 +124,20 @@ class GeographicProductCiRePrCa extends Scenario {
   wrapper(
     Wrapper("LUT5")
       .hasAttribute {
-        Attribute("city5") sameAs CITY
+        Attribute("city_lut_5") sameAs CITY
       }
       .hasAttribute {
-        Attribute("region5") sameAs REGION
+        Attribute("region_lut_5") sameAs REGION
       }
   )
 
   wrapper(
     Wrapper("LUT6")
       .hasAttribute {
-        Attribute("product6") sameAs PRODUCT
+        Attribute("product_lut_6") sameAs PRODUCT
       }
       .hasAttribute {
-        Attribute("category6") sameAs CATEGORY
+        Attribute("category_lut_6") sameAs CATEGORY
       }
   )
 
