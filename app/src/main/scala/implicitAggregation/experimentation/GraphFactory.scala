@@ -38,7 +38,7 @@ object GraphFactory {
         } yield List(i) ++ j
       }
     val wrapperCombinations = crossJoin(levels).take(5)
-    println("#Wrapper DATA:" + wrapperCombinations.size)
+    println("# Data Wrapper:" + wrapperCombinations.size)
     wrapperCombinations.map(x => {
       val c = counter.next()
       val attributes = {
@@ -60,7 +60,7 @@ object GraphFactory {
       case _ :: Nil => Nil
     }
     val w = levels.flatMap(generateWrapperForDimension)
-    println("Wrapper LUT:" + w.size)
+    println("# LUT Wrapper:" + w.size)
     w
   }
 

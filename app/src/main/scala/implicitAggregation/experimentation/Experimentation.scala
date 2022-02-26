@@ -7,6 +7,9 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 
 class Experiment(nDimension: Int, nLevels: Int, nWrappers: Int) extends Scenario {
+  println(s"nDimension: $nDimension")
+  println(s"nLevels: $nLevels")
+  println(s"nWrappers: $nWrappers")
   private val experimentsVariable = GraphFactory.generateExperimentsIntegrationGraph(nDimension,nLevels,nWrappers)
   super.targetGraph(experimentsVariable._1)
   super.query(experimentsVariable._2)
@@ -16,7 +19,7 @@ class Experiment(nDimension: Int, nLevels: Int, nWrappers: Int) extends Scenario
   private val scenario = "experiment"
   FileUtils.deleteDirectory(new File(Utils.buildScenarioPath(scenario)))
   super.scenario(scenario)
-
+  println("# Roll-Up queries: " + Math.pow(nLevels,nDimension).toInt)
   def runExperiment(): (Long,Long,Long) =
     ImplicitRollUp.executeImplicitRollUp(AF, makeQuery(), MG, scenarioName, Utils.SCENARIOS_PATH)(makeImplicitRollUp = true)(W)
 }
@@ -58,6 +61,7 @@ class ExperimentsRunner {
   private def deleteExperimentsDir(): Unit = {
     val scenario = "experiment"
     FileUtils.deleteDirectory(new File(Utils.buildScenarioPath(scenario)))
+
   }
 
   def run(): Unit = {
@@ -68,5 +72,5 @@ class ExperimentsRunner {
 
 
 object Experimentation extends App {
-  new ExperimentsRunner().run()
+  val r = new Experiment(5, 2, 1).runExperiment()
 }

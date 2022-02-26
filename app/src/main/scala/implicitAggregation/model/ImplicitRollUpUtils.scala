@@ -37,6 +37,7 @@ object ImplicitRollUpUtils {
     buildPath(scenario)
     val scenario_path = buildScenarioPath(scenario)
     println("Generating files in directory: " + scenario_path)
+    new File(scenario_path).delete()
     // Writers
     val globalGraphWriter = new BufferedWriter(new FileWriter(scenario_path + "global_graph.txt"))
     val sourceGraphWriter = new BufferedWriter(new FileWriter(scenario_path + "source_graph.txt"))
