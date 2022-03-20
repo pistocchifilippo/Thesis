@@ -9,7 +9,9 @@ object ImplicitRollUp {
       println("IMPLICIT ROLL-UP: YES")
       val allDimensionQueries_ = allDimensionQueries(query, graph)
       val rollUpQueries_ = query :: rollUpQueries(query, allDimensionQueries_)
+      val timeGenStart = System.currentTimeMillis()
       ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, rollUpQueries_)(scenario)
+      val timeGen = System.currentTimeMillis() - timeGenStart
       wrappers.foreach(println)
       val timeRewritingStart = System.currentTimeMillis()
       val CQs = Rewriting.rewrite(scenario, basePath) //*** v1
@@ -40,7 +42,7 @@ object ImplicitRollUp {
       val timeExecuting = System.currentTimeMillis() - timeExecutingStart
       val timeAlg = System.currentTimeMillis() - timeAlgStart - timeRewriting - timeExecuting
 
-      (timeRewriting,timeExecuting,timeAlg)
+      (timeRewriting,timeExecuting,timeAlg - timeGen)
     } else {
       println("IMPLICIT ROLL-UP: NO")
       ImplicitRollUpUtils.generateAllFiles(Set(graph), wrappers, List(query))(scenario)

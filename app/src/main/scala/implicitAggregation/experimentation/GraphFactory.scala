@@ -28,7 +28,7 @@ object GraphFactory {
       case _ => false
     }).head :: dimension.linkedConcepts.toList.flatMap(c => dimensionFeaturesSorted(c._2))
 
-  def generateDataWrappers(nWrap: Int, counter: Iterator[Int], levels: List[List[Feature]],measure: (Edge,Measure)): List[Wrapper] = {
+  def generateDataWrappers(nWrap: Int, counter: Iterator[Int], levels: List[List[Feature]],measure: (Edge,Measure),tolerance: Int): List[Wrapper] = {
     def crossJoin[T](list: List[List[T]]): List[List[T]] =
       list match {
         case xs :: Nil => xs map (List(_))
@@ -37,7 +37,7 @@ object GraphFactory {
           j <- crossJoin(xs)
         } yield List(i) ++ j
       }
-    val wrapperCombinations = crossJoin(levels).take(5)
+    val wrapperCombinations = crossJoin(levels).flatMap(w => (0 to nWrap).map(_ => w))
     println("# Data Wrapper:" + wrapperCombinations.size)
     wrapperCombinations.map(x => {
       val c = counter.next()
@@ -45,7 +45,7 @@ object GraphFactory {
         Attribute(measure._2.name + c) sameAs measure._2
       }::x.map(feat => Attribute(feat.name + c) sameAs feat)
       WrapperImpl("WrapperW" + c,attributes.toSet)
-    })
+    }).take(tolerance)
   }
 
   def generateLutWrappers(counter: Iterator[Int],levels: List[List[Feature]]): List[Wrapper] = {
@@ -64,22 +64,22 @@ object GraphFactory {
     w
   }
 
-  def generateWrappers(nWrappers: Int,levels: List[List[Feature]], measure: (Edge,Measure)): Set[Wrapper] = {
+  def generateWrappers(nWrappers: Int,levels: List[List[Feature]], measure: (Edge,Measure),tolerance: Int): Set[Wrapper] = {
     val it = new Iterator[Int] {
       var c = 0
       override def hasNext: Boolean = true
 
       override def next(): Int = {c = c + 1;c}
     }
-    generateDataWrappers(nWrappers,it,levels,measure).toSet ++ generateLutWrappers(it,levels)
+    generateDataWrappers(nWrappers,it,levels,measure,tolerance).toSet ++ generateLutWrappers(it,levels)
   }
 
-  def generateExperimentsIntegrationGraph(nDimensions: Int, nLevels: Int, nWrappers: Int): (Concept,Concept,Set[Wrapper],AggregatingFunction) = {
+  def generateExperimentsIntegrationGraph(nDimensions: Int, nLevels: Int, nWrappers: Int, tolerance: Int): (Concept,Concept,Set[Wrapper],AggregatingFunction) = {
     val dimensions = generateDimensions(nDimensions,nLevels)
     val measure = (Edge("hasFeature"),Measure("M"))
     val aggregatingFunction = AggregatingFunction("sum") aggregates measure._2
     val experimentGraph = GenericConcept("EXPERIMENT",dimensions,Set(measure))
-    val wrappers = generateWrappers(nWrappers,dimensions.map(c => dimensionFeaturesSorted(c._2)).toList,measure)
+    val wrappers = generateWrappers(nWrappers,dimensions.map(c => dimensionFeaturesSorted(c._2)).toList,measure,tolerance)
     val query = GenericConcept("EXPERIMENT",generateDimensionsQ(nDimensions,nLevels),Set(measure))
     (experimentGraph,query,wrappers,aggregatingFunction)
   }
@@ -87,6 +87,6 @@ object GraphFactory {
 }
 
 object TestGraphFact extends App {
-  val ex = GraphFactory.generateExperimentsIntegrationGraph(1,5,1)
+  val ex = GraphFactory.generateExperimentsIntegrationGraph(1,5,1,5)
   ex._3.foreach(println)
 }
